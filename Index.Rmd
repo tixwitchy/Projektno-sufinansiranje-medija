@@ -26,32 +26,34 @@ library(writexl)
 
 options(scipen = 999)
 
-
-Projectmedia<-read_excel("Projektno sufinansiranje medija.xlsx")
-
-#firstup <- function(x) {
-  #substr(x, 1, 1) <- toupper(substr(x, 1, 1))
-#  x
-#}
-
-
-#Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`<- stringi::stri_trans_totitle(Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
-
-#Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski Sekretarijat Za Kulturu I Javno Informisanje"]<-"Pokrajinski sekretarijat za kulturu i javno informisanje"
-
-#Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Ministarstvo Kulture"]<-"Ministarstvo kulture"
-
-Projectmedia1<-Projectmedia%>%
-  filter(`SREDSTVA U EVRIMA`!=0)
-brojpodnosilaca<-n_distinct(Projectmedia1$`PODNOSILAC PROJEKTA`)
-
-brojprojekata <- Projectmedia%>%
-  filter(`SREDSTVA U DINARIMA`!=0)
-
-brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski sekretarijat"
-
-brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Pokrajinski sekretarijat"] <- "Lokalne samouprave"
+# ucitavanje excel tabele
  
+Projectmedia <- read_excel("Projektno sufinansiranje medija.xlsx")
+
+#Ukupan broj podnosilaca
+
+#Isklucivanje konkursa gde sredstva nisu dodeljena
+
+Projectmedia1 <- Projectmedia %>%
+  
+  filter(`SREDSTVA U EVRIMA` != 0)
+
+brojpodnosilaca <- n_distinct (Projectmedia1$`PODNOSILAC PROJEKTA`)
+
+brojprojekata <- Projectmedia %>%
+  
+  filter(`SREDSTVA U DINARIMA` != 0)
+
+#Broj projekata na konkursima
+
+#Skracivanje naziva za Pokrajinski sekretarijat i spajanje svih upstina pod naziv Lokalne samouprave
+
+brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` == "Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski sekretarijat"
+
+brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat"] <- "Lokalne samouprave"
+
+ 
+
 brojprojekataorgan<-brojprojekata%>%
   
   group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)%>%
