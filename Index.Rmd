@@ -1,7 +1,7 @@
 ---
 title: "Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja"
 author: "Nedim Sejdinović i Duško Medić"
-date: "`r Sys.Date()`"
+date: '`r format(Sys.Date(),"%d. %m. %Y.")`'
 output: 
   prettydoc::html_pretty:
     theme: cayman
