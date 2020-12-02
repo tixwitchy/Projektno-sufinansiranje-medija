@@ -48,62 +48,90 @@ brojprojekata <- Projectmedia %>%
 
 #Skracivanje naziva za Pokrajinski sekretarijat i spajanje svih upstina pod naziv Lokalne samouprave
 
-brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` == "Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski sekretarijat"
+brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [brojprojekata$`ORGAN KOJI RASPISUJE
+
+KONKURS/OPŠTINA` == "Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski
+
+sekretarijat"
 
 brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat"] <- "Lokalne samouprave"
 
- 
+# Broj projekata prema organu koji je raspisao konkurs za grafikon
 
-brojprojekataorgan<-brojprojekata%>%
+brojprojekataorgan <- brojprojekata %>%
   
-  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)%>%
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
   
-  summarise(`BROJ PROJEKATA`=n())%>%
+  summarise(`BROJ PROJEKATA` = n()) %>%
   
-  mutate(Info=paste('<br>', "Organ koji raspisuje konkurs:", 
+  mutate(Info = paste('<br>', "Organ koji raspisuje konkurs:", 
                       
                       `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
                       
                       "Ukupan broj projekata:",format(`BROJ PROJEKATA`,big.mark = ","), '<br>'))
 
-brojprojekataorgan1<-brojprojekataorgan
+# Broj projekata prema organu formatiran za tekstualni deo izvestaja
 
-brojprojekataorgan1$`BROJ PROJEKATA`<-  format(brojprojekataorgan1$`BROJ PROJEKATA`,big.mark = ",")
+brojprojekataorgan1 <- brojprojekataorgan
 
-brojprojekataorgangod<-brojprojekata%>%
-  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,GODINA)%>%
-  summarise(`BROJ PROJEKATA`=n())%>%
-  mutate(Info= paste("<br>",
-                       "Organ koji raspisuje konkurs:",`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,"<br>",
-                       "Godina:",GODINA,"<br>",
-                       "Broj projekata:",format(`BROJ PROJEKATA`,big.mark = ","),"<br>"
+brojprojekataorgan1$`BROJ PROJEKATA` <-  format(brojprojekataorgan1$`BROJ PROJEKATA`,big.mark = ",")
+
+# Broj projekata prema organu koji je raspisao konkurs i godini za grafikon
+
+brojprojekataorgangod <- brojprojekata %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, GODINA) %>%
+  
+  summarise(`BROJ PROJEKATA` = n()) %>%
+  
+  mutate(Info = paste("<br>",
+                      
+                       "Organ koji raspisuje konkurs:", `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, "<br>",
+                       "Godina:", GODINA, "<br>",
+                      
+                       "Broj projekata:", format(`BROJ PROJEKATA`,big.mark = ","), "<br>"
                         ))
 
-brojprojekataorgangod1<-brojprojekataorgangod
+#Broj projekata prema organu koji je raspisao konkurs i godini  formatiran za tekstualni deo
 
-brojprojekataorgangod1$`BROJ PROJEKATA`<-  format(brojprojekataorgangod1$`BROJ PROJEKATA`,big.mark = ",")
+brojprojekataorgangod1 <- brojprojekataorgangod
 
-brojprojekatagodina<-brojprojekata%>%
+brojprojekataorgangod1$`BROJ PROJEKATA` <-  format(brojprojekataorgangod1$`BROJ PROJEKATA`, big.mark = ",")
+
+#Ukupan broj projekata po godinama za grafikon
+
+brojprojekatagodina <- brojprojekata %>%
   
-  group_by(`GODINA`)%>%
+  group_by(`GODINA`) %>%
   
-  summarise(`BROJ PROJEKATA`=n())%>%
-  mutate(Info= paste("<br>",
-                       "Godina:",GODINA,"<br>",
-                       "Broj projekata:",format(`BROJ PROJEKATA`,big.mark = ","),"<br>"
+  summarise(`BROJ PROJEKATA` = n()) %>%
+  
+  mutate(Info = paste("<br>",
+                      
+                       "Godina:", GODINA, "<br>",
+                      
+                       "Broj projekata:", format(`BROJ PROJEKATA`, big.mark = ","), "<br>"
                         ))
 
-brojprojekatagodina1<-brojprojekatagodina
+#Ukupan broj projekata po godinama, formatiran za tekstualni deo izvestaja
 
-brojprojekatagodina1$`BROJ PROJEKATA`<-  format(brojprojekatagodina1$`BROJ PROJEKATA`,big.mark = ",")
+brojprojekatagodina1 <- brojprojekatagodina
 
-brojopstina<-n_distinct(Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Pokrajinski sekretarijat za kulturu i javno informisanje"])
+brojprojekatagodina1$`BROJ PROJEKATA` <- format(brojprojekatagodina1$`BROJ PROJEKATA`, big.mark = ",")
 
+#Ukupan broj opstina za tekstualni deo izvestaja
 
-opstinebezkonkursa <- Projectmedia%>%
-  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)%>%
-  summarize(`SREDSTVA U DINARIMA`=sum(`SREDSTVA U DINARIMA`))%>%
-  filter(`SREDSTVA U DINARIMA`==0)
+brojopstina <- n_distinct(Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje"])
+
+#Ukupan broj opstina koje nisu raspisale konkurse za tekstualni deo izvestaja
+
+opstinebezkonkursa <- Projectmedia %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
+  
+  summarize(`SREDSTVA U DINARIMA`=sum(`SREDSTVA U DINARIMA`)) %>%
+  
+  filter(`SREDSTVA U DINARIMA` == 0)
 
 
 
