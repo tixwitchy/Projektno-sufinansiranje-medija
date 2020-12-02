@@ -7,11 +7,11 @@ Dobrodošli na github repozitorijum sa kog možete da preuzmete kod u programsko
 Fajlovi koji su vam potrebni za izradu aplikacije su:
 - Projektno sufinansiranje medija.xlsx
 - app.R
--folder www
+- folder www
 
 ##Online publikacija "Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja"
 
-Fajlovi koji su vam potrebni za izradu aplikacije su:
+Fajlovi koji su vam potrebni za izradu online publikacije su:
 - Projektno sufinansiranje medija.xlsx
 - population.xlsx
 - Index.Rmd
