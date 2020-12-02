@@ -21,6 +21,7 @@ library(viridis)
 library(crosstalk)
 library(lubridate)
 library(writexl)
+library(stringi)
 
 
 
@@ -257,64 +258,92 @@ Opstinesumasvi<- Projectmedia %>%
 #Pretvaranje naziva opstina u velika slova da bi se spojilo sa excel tabelom (population) -broj stanovnika
 
 Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` <- toupper(Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
-population<-read_excel("population.xlsx")
 
-popopstine<-left_join(Opstinesumasvi,population)
+# Ucitavanje tabele sa brojem stanovnika po opstini i spajanje dve tabele
 
-popopstine$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`<-stringi::stri_trans_totitle(popopstine$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
+population <- read_excel("population.xlsx")
 
-popopstine<- popopstine%>%
-  mutate(`Po broju stanovnika`= round(`SREDSTVA U EVRIMA`/POPULACIJA,2))%>%
+popopstine <- left_join(Opstinesumasvi,population)
+
+
+popopstine$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` <- stri_trans_totitle(popopstine$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
+
+# Kreiranje nove kolone  sa sredstvima u evrima per capita za opstine
+popopstine <- popopstine %>%
+  
+  mutate(`Po broju stanovnika`= round(`SREDSTVA U EVRIMA`/POPULACIJA,2)) %>%
+  
   arrange(desc(`Po broju stanovnika`))
 
-popopstine1<- popopstine%>%
+# Iskljucivanje opstina koje pripadaju opstini Nis-Razlog objasnjen u analizi u izvestaju
+
+popopstine1 <- popopstine%>%
   
-  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Crveni Krst Niš", `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Pantelej" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Medijana" )
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Crveni Krst Niš", `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pantelej" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Medijana" )
 
 
+# Kreiranje podskupa sa top 5 opstina koje su dale najvise novca u evrima po glavi stanovnika (per capita)
 
-popopstinetop <- popopstine1%>%
-  arrange(desc(`Po broju stanovnika`))%>%
- top_n(5,`Po broju stanovnika`)%>%
-  mutate(Info=paste('<br>',
+popopstinetop <- popopstine1 %>%
+  
+  arrange(desc(`Po broju stanovnika`)) %>%
+  
+ top_n(5, `Po broju stanovnika`) %>%
+  
+  mutate(Info = paste('<br>',
                       
                       `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
-                      "Dodeljeno novca po glavi stanovnika:",`Po broju stanovnika`, 'eur<br>',
-                      "Ukupno novca:",format(`SREDSTVA U EVRIMA`,big.mark = ","), 'eur<br>'))
+                      
+                      "Dodeljeno novca po glavi stanovnika:", `Po broju stanovnika`, 'eur<br>',
+                      
+                      "Ukupno novca:", format(`SREDSTVA U EVRIMA`, big.mark = ","), 'eur<br>'))
 
-popopstinelow <- popopstine1%>%
-  arrange(`Po broju stanovnika`)%>%
- top_n(-5,`Po broju stanovnika`)%>%
-  mutate(Info=paste('<br>',
+# Kreiranje podskupa sa  5 opstina koje su dale najmanje novca u evrima po glavi stanovnika (per capita)
+
+popopstinelow <- popopstine1 %>%
+  
+  arrange(`Po broju stanovnika`) %>%
+  
+ top_n(-5, `Po broju stanovnika`) %>%
+  
+  mutate(Info = paste('<br>',
                       
                       `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
-                      "Dodeljeno novca po glavi stanovnika:",`Po broju stanovnika`, 'eur<br>',
-                      "Ukupno novca:",format(`SREDSTVA U EVRIMA`,big.mark = ","), 'eur<br>'))
+                      
+                      "Dodeljeno novca po glavi stanovnika:", `Po broju stanovnika`, 'eur<br>',
+                      
+                      "Ukupno novca:", format(`SREDSTVA U EVRIMA`,big.mark = ","), 'eur<br>'))
 
 
-barchartpodnosiocizasve <- Projectmedia%>%
+#Kreiranje podskupa za 5 podnosilaca koji su dobili najvise novca od svih organa
+
+barchartpodnosiocizasve <- Projectmedia %>%
   
   group_by(`PODNOSILAC PROJEKTA`) %>%
   
-  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`), n=n()) %>%
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`), n = n()) %>%
   
-  arrange(desc(`SREDSTVA U EVRIMA`))%>%
+  arrange(desc(`SREDSTVA U EVRIMA`)) %>%
   
-  top_n(5,`SREDSTVA U EVRIMA`)%>%
+  top_n(5, `SREDSTVA U EVRIMA`) %>%
 
   mutate(Info = paste('<br>', "Podnosilac:", 
                       
                       `PODNOSILAC PROJEKTA`, '<br>',
                       
-                      "Ukupno dobijena sredstava:",format (`SREDSTVA U EVRIMA`, big.mark=',', digits = 0, nsmall=0, scientific = FALSE), 'eur<br>',
-                      "Broj projekata:", n,'<br>'))
+                      "Ukupno dobijena sredstava:", format (`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE), 'eur<br>',
                       
+                      "Broj projekata:", n, '<br>'))
+                      
+
+#top 5 podnosilaca koji su dobili najvise sredstava od svih organa, formatirano, za tekstualni deo izvestaja
 
 barchartpodnosiocizasve1<-barchartpodnosiocizasve
 
 
-barchartpodnosiocizasve1$`SREDSTVA U EVRIMA`<- format(barchartpodnosiocizasve1$`SREDSTVA U EVRIMA`, big.mark = ",")
+barchartpodnosiocizasve1$`SREDSTVA U EVRIMA` <- format(barchartpodnosiocizasve1$`SREDSTVA U EVRIMA`, big.mark = ",")
 
+# Podnosioci koji su dobili najvise novca od ministarstva kulture za tekstualni deo izvestaja
 
 podnosiocikult <- Projectmedia %>%
   
@@ -326,9 +355,10 @@ podnosiocikult <- Projectmedia %>%
   
   arrange(desc(`SREDSTVA U EVRIMA`)) 
 
-podnosiocikult$`SREDSTVA U EVRIMA`<-format(podnosiocikult$`SREDSTVA U EVRIMA`, big.mark = ",")
+podnosiocikult$`SREDSTVA U EVRIMA` <- format(podnosiocikult$`SREDSTVA U EVRIMA`, big.mark = ",")
 
 
+# Podnosioci koji su dobili najvise novca od pokrajinskog sekretarijata za tekstualni deo izvestaja
 
 podnosiocipoksek <- Projectmedia %>%
   
@@ -340,7 +370,9 @@ podnosiocipoksek <- Projectmedia %>%
   
   arrange(desc(`SREDSTVA U EVRIMA`)) 
 
-podnosiocipoksek$`SREDSTVA U EVRIMA`<-format(podnosiocipoksek$`SREDSTVA U EVRIMA`, big.mark = ",")
+podnosiocipoksek$`SREDSTVA U EVRIMA` <- format(podnosiocipoksek$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+# Podnosioci koji su dobili najvise novca od svih lokalnih samouprava za tekstualni deo izvestaja
 
 podnosiociloksam <- Projectmedia %>%
   
@@ -352,13 +384,16 @@ podnosiociloksam <- Projectmedia %>%
   
   arrange(desc(`SREDSTVA U EVRIMA`))
 
-podnosiociloksam$`SREDSTVA U EVRIMA`<-format(podnosiociloksam$`SREDSTVA U EVRIMA`, big.mark = ",")
+podnosiociloksam$`SREDSTVA U EVRIMA` <- format(podnosiociloksam$`SREDSTVA U EVRIMA`, big.mark = ",")
 
 
-Zastupljenosttema <-Projectmedia
+# Ukupna astupljenost tema za grafikon 
+
+Zastupljenosttema <- Projectmedia
 
 Zastupljenosttema  <- Zastupljenosttema %>%
-  filter(!`SREDSTVA U EVRIMA`==0)
+  
+  filter(!`SREDSTVA U EVRIMA` == 0)
 
 # Promena NA vrednosti sa Nema informacija
 
@@ -369,19 +404,19 @@ Zastupljenosttema  <- Zastupljenosttema  %>%
   
   group_by(`TEMA PROJEKTA`) %>%
   
-  summarize( n = n(),`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  summarize( n = n(), `SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
   
   arrange(desc(`SREDSTVA U EVRIMA`)) %>%
   
-  mutate(PROCENAT=round( `SREDSTVA U EVRIMA`/sum(`SREDSTVA U EVRIMA`)*100,2))%>%
+  mutate(PROCENAT=round( `SREDSTVA U EVRIMA`/sum(`SREDSTVA U EVRIMA`)*100, 2)) %>%
   
   mutate(Info = paste('<br>', "Tema:", 
                       
                       `TEMA PROJEKTA`, '<br>',
                       
-                      "Ukupno sredstava po temi:",format (`SREDSTVA U EVRIMA`, big.mark=',', digits = 0, nsmall=0, scientific = FALSE), 'eur<br>',
+                      "Ukupno sredstava po temi:", format (`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE), 'eur<br>',
                       
-                      "Učešće u dodeljenim sredstvima:", PROCENAT,"%<br>",
+                      "Učešće u dodeljenim sredstvima:", PROCENAT, "%<br>",
                       
                       "Ukupan broj projekata:", n, "<br>"
                       
@@ -405,31 +440,39 @@ Zastupljenosttema  <- Zastupljenosttema  %>%
                             
                             `TEMA PROJEKTA` == "Sport" ~ "#FDE725FF"))
 
-zatekstteme<-Zastupljenosttema 
+# Zastupljenost tema za tekstualni deo izvestaja
 
-zatekstteme$`TEMA PROJEKTA`<-tolower(zatekstteme$`TEMA PROJEKTA`)
+zatekstteme <- Zastupljenosttema 
 
-zatekstteme$`SREDSTVA U EVRIMA`<-format (zatekstteme$`SREDSTVA U EVRIMA`, big.mark=',', digits = 0, nsmall=0, scientific = FALSE)
+zatekstteme$`TEMA PROJEKTA` <- tolower(zatekstteme$`TEMA PROJEKTA`)
 
-zatekstteme$`TEMA PROJEKTA`[zatekstteme$`TEMA PROJEKTA`=="nema informacija"]<-NA
+zatekstteme$`SREDSTVA U EVRIMA` <- format (zatekstteme$`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
 
-zatekstteme<-zatekstteme%>%
+zatekstteme$`TEMA PROJEKTA`[zatekstteme$`TEMA PROJEKTA` == "nema informacija"] <- NA
+
+zatekstteme <- zatekstteme %>%
+  
   na.omit()
-zatekstteme1<-Zastupljenosttema
-zatekstteme1$`SREDSTVA U EVRIMA`<-format (zatekstteme1$`SREDSTVA U EVRIMA`, big.mark=',', digits = 0, nsmall=0, scientific = FALSE)
+
+zatekstteme1 <- Zastupljenosttema
+
+zatekstteme1$`SREDSTVA U EVRIMA` <- format (zatekstteme1$`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
 
 
+#Koliko je sredstava dodeljeno za projekte gde nije tema navedena u resenjima i procenat
 
-bezinfonovci<-zatekstteme1 $`SREDSTVA U EVRIMA`[zatekstteme1 $`TEMA PROJEKTA`=="Nema informacija"]
-bezinfoprocenti<-zatekstteme1 $`PROCENAT`[zatekstteme1 $`TEMA PROJEKTA`=="Nema informacija"]
+bezinfonovci  <-zatekstteme1 $`SREDSTVA U EVRIMA`[zatekstteme1 $`TEMA PROJEKTA` == "Nema informacija"]
 
+bezinfoprocenti <- zatekstteme1 $`PROCENAT`[zatekstteme1 $`TEMA PROJEKTA` == "Nema informacija"]
+
+#Dodeljeno sredstava po temama po godinama za grafikon 
 
 linechartteme <- Projectmedia
 
-#Iskljucivanje skucajeva kada sredstva nisu dodeljena
+#Iskljucivanje slucajeva kada sredstva nisu dodeljena
 
 linechartteme <- linechartteme%>%
-  filter(!`SREDSTVA U EVRIMA`==0)
+  filter(!`SREDSTVA U EVRIMA` == 0)
 
 # Promena NA vrednosti sa Nema informacija
 linechartteme$`TEMA PROJEKTA`[is.na(linechartteme$`TEMA PROJEKTA`)] <- "Nema informacija"
@@ -447,39 +490,59 @@ linechartteme <- linechartteme %>%
   
     summarize(n=n(),`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
   
-    mutate(Info= paste("<br>","Tema:",`TEMA PROJEKTA`,"<br>",
+    mutate(Info= paste("<br>", "Tema:", `TEMA PROJEKTA`, "<br>",
                        
-                          "Ukupno dodeljeno sredstava po temi:",format(`SREDSTVA U EVRIMA`,big.mark = ","),"eur<br>",
+                          "Ukupno dodeljeno sredstava po temi:", format(`SREDSTVA U EVRIMA`,big.mark = ","), "eur<br>",
                        
-                       "Broj projekata po temi:",n,"<br>",
+                       "Broj projekata po temi:", n, "<br>",
                        
-                        "Godina:",GODINA,"<br>"))
+                        "Godina:", GODINA, "<br>"))
 
 
 
 linechartteme$`TEMA PROJEKTA` <- as.factor(linechartteme$`TEMA PROJEKTA`)
 
-linechartteme1<-linechartteme
-linechartteme1$`SREDSTVA U EVRIMA`<-format (linechartteme1$`SREDSTVA U EVRIMA`, big.mark=',', digits = 0, nsmall=0, scientific = FALSE)
+#Dodeljeno sredstava po temama po godinama za tekstualni deo izvestaja
 
-info2015sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Informativni program" & linechartteme1 $`GODINA`== 2015 ]
+linechartteme1 <- linechartteme
 
-info2020sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Informativni program" & linechartteme1 $`GODINA`== 2020 ]
-
-sumabezinfo2020<- sum(linechartteme$`SREDSTVA U EVRIMA`[linechartteme $`GODINA`== 2020])-linechartteme $`SREDSTVA U EVRIMA`[linechartteme $`TEMA PROJEKTA`=="Informativni program" & linechartteme1 $`GODINA`== 2020 ]
-
-sumabezinfo2020<-format (sumabezinfo2020, big.mark=',', digits = 0, nsmall=0, scientific = FALSE)
-
-kult2015sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Kultura i obrazovanje" & linechartteme1 $`GODINA`== 2015 ]
-
-kult2020sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Kultura i obrazovanje" & linechartteme1 $`GODINA`== 2020 ]
+linechartteme1$`SREDSTVA U EVRIMA` <- format (linechartteme1$`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
 
 
-manjine2018sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Manjinski sadržaj" & linechartteme1 $`GODINA`== 2018]
+##Ukupno dodeljeno 2015 za informativni program za tekstualni deo izvestaja
 
-manjine2019sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Manjinski sadržaj" & linechartteme1 $`GODINA`== 2019]
+info2015sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Informativni program" & linechartteme1 $`GODINA` == 2015 ]
 
-manjine2020sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Manjinski sadržaj" & linechartteme1 $`GODINA`== 2020 ]
+##Ukupno dodeljeno 2020 za informativni program za tekstualni deo izvestaja
+
+info2020sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Informativni program" & linechartteme1 $`GODINA` == 2020 ]
+
+##Ukupno dodeljeno 2020 za sve ostale programe bez informative za tekstualni deo izvestaja
+
+sumabezinfo2020 <- sum(linechartteme$`SREDSTVA U EVRIMA`[linechartteme $`GODINA` == 2020]) - linechartteme $`SREDSTVA U EVRIMA`[linechartteme $`TEMA PROJEKTA` == "Informativni program" & linechartteme1 $`GODINA` == 2020 ]
+
+sumabezinfo2020 <- format (sumabezinfo2020, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
+
+##Ukupno dodeljeno 2015 za kulturu i obrazovanje za tekstualni deo izvestaja
+
+kult2015sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Kultura i obrazovanje" & linechartteme1 $`GODINA` == 2015 ]
+
+##Ukupno dodeljeno 2020 za kulturu i obrazovanje za tekstualni deo izvestaja
+
+kult2020sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Kultura i obrazovanje" & linechartteme1 $`GODINA` == 2020 ]
+
+
+#Ukupno dodeljeno 2018 za manjinski sadrzaj za tekstualni deo izvestaja
+
+manjine2018sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Manjinski sadržaj" & linechartteme1 $`GODINA` == 2018]
+
+##Ukupno dodeljeno 2019 za manjinski sadrzaj za tekstualni deo izvestaja
+
+manjine2019sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Manjinski sadržaj" & linechartteme1 $`GODINA` == 2019]
+
+##Ukupno dodeljeno 2020 za manjinski sadrzaj za tekstualni deo izvestaja
+
+manjine2020sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Manjinski sadržaj" & linechartteme1 $`GODINA` == 2020 ]
 
 
 ```
@@ -624,7 +687,9 @@ U periodu od početka 2015. do kraja septembra 2020. godine ukupan broj odobreni
 
 ```{r echo=FALSE}
 
-brojprojekatagraf<- ggplot (data = brojprojekataorgan, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,`BROJ PROJEKATA`), y = `BROJ PROJEKATA`,label = `Info`))+
+# Kreiranje bar charta  za broj projekata prema organu koji je dodelio sredstva
+
+brojprojekatagraf <- ggplot (data = brojprojekataorgan, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,`BROJ PROJEKATA`), y = `BROJ PROJEKATA`,label = `Info`))+
           
             geom_bar (stat = "identity",fill = c("#9F2A63FF","#F57D15FF","#FAC127FF"))+
             
@@ -632,7 +697,7 @@ brojprojekatagraf<- ggplot (data = brojprojekataorgan, aes (x = reorder(`ORGAN K
           
             ylab ("Ukupan broj projekata")+
           
-      ggtitle (paste("Ukupan broj projekata od 2015.\n na svim nivoima do septembra 2020.godine iznosi",format(nrow(brojprojekata),big.mark = ",")))+
+      ggtitle (paste("Ukupan broj projekata od 2015.\n na svim nivoima do septembra 2020.godine iznosi", format(nrow(brojprojekata), big.mark = ",")))+
 
             coord_flip()+
           
@@ -646,9 +711,9 @@ brojprojekatagraf<- ggplot (data = brojprojekataorgan, aes (x = reorder(`ORGAN K
                    
                    axis.text.y = element_blank(),
                    
-                   axis.ticks=element_blank(),
+                   axis.ticks = element_blank(),
                    
-                   plot.margin=unit(c(1,1,1.5,1.2),"cm"))
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
         
         ggplotly(brojprojekatagraf, tooltip = "Info") %>%
           
@@ -671,9 +736,11 @@ Broj odobrenih medijskih projekata povećava se iz godine u godinu. Ukupan broj 
 
 ```{r echo=FALSE, warning=FALSE}
 
+# Kreiranje line charta  za broj projekata po godinama od svih organa koji su raspisali konkurs
+
 brojprojekatagrafgod <- ggplot (brojprojekatagodina, aes(as.factor(GODINA), `BROJ PROJEKATA`, label = Info))+
-          geom_point(color="#1DA460")+ 
-            geom_line(aes(group=1),colour="#1DA460")+
+          geom_point(color = "#1DA460")+ 
+            geom_line(aes(group = 1),colour = "#1DA460")+
           
             ggtitle("Rast broja ukupno podržanih projekata")+
           
@@ -700,8 +767,8 @@ brojprojekatagrafgod <- ggplot (brojprojekatagodina, aes(as.factor(GODINA), `BRO
           
           layout( annotations = list(x = 1, y = -0.2, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
                                                            
-                                                           showarrow = F, xref='paper', yref='paper', 
-                                                           xanchor='right', yanchor='auto', xshift=0, yshift=0, font=list(size=11)))
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
+                                                           xanchor='right', yanchor='auto', xshift = 0, yshift = 0, font = list(size = 11)))
 ```
 
 
@@ -709,7 +776,10 @@ brojprojekatagrafgod <- ggplot (brojprojekatagodina, aes(as.factor(GODINA), `BRO
 Beležimo postepeni rast broja odobrenih medijskih projekata od Ministarstva (2015 –`r brojprojekataorgangod1[7,3]`, 2016 – `r brojprojekataorgangod1[8,3]`, 2017 – `r brojprojekataorgangod1[9,3]`, 2018 – `r brojprojekataorgangod1[10,3]`, 2019 – `r brojprojekataorgangod1[11,3]`, 2020 – `r brojprojekataorgangod1[12,3]`), a realizovani projekti na nivou lokalnih samouprava su takoreći udvostručeni u posmatranom periodu (2015 – `r brojprojekataorgangod1[1,3]`, 2016 – `r brojprojekataorgangod1[2,3]`, 2017 – `r brojprojekataorgangod1[3,3]`, 2018 – `r brojprojekataorgangod1[4,3]`, 2019 – `r brojprojekataorgangod1[5,3]`, 2020 – `r brojprojekataorgangod1[6,3]`). Uvećan je i broj projekata koji odobrava Sekretarijat (2015 – `r brojprojekataorgangod1[13,3]`, 2016 – `r brojprojekataorgangod1[14,3]`, 2017 – `r brojprojekataorgangod1[15,3]`, 2018 – `r brojprojekataorgangod1[16,3]`, 2019 – `r brojprojekataorgangod1[17,3]`, 2020 – `r brojprojekataorgangod1[18,3]`). Za sve ove podatke postoji ograda vezana za 2020. godinu, koja, kao što smo rekli, nije kompletno tretirana.
 
 ```{r echo=FALSE}
- gg <- ggplot (brojprojekataorgangod, aes(GODINA, `BROJ PROJEKATA`, group = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, label = Info, color =`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)) +
+
+# Kreiranje line charta  za broj projekata po godinama prema organu koji je dodelio sredstva
+
+ gg <- ggplot (brojprojekataorgangod, aes(GODINA, `BROJ PROJEKATA`, group = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, label = Info, color = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)) +
           
             geom_line(position = position_dodge(0.1))+
           
@@ -717,7 +787,7 @@ Beležimo postepeni rast broja odobrenih medijskih projekata od Ministarstva (20
           
             ggtitle("Trend rasta ukupno podržanih projekata prema organu")+
           
-            scale_color_manual(values=c("#9F2A63FF","#F57D15FF","#FAC127FF")) +
+            scale_color_manual(values = c("#9F2A63FF", "#F57D15FF", "#FAC127FF")) +
           
             ylab("Broj projekata")+
           
@@ -740,13 +810,13 @@ Beležimo postepeni rast broja odobrenih medijskih projekata od Ministarstva (20
           
             config(displayModeBar=FALSE) %>%
           
-          layout(legend = list(title = list(text = 'Organ'), orientation = "h", x = 0, y =-0.3), annotations = 
+          layout(legend = list(title = list(text = 'Organ'), orientation = "h", x = 0, y = -0.3), annotations = 
                    
                                                       list(x = 1, y = -0.3, text = "*Klikom na teme u legendi ispod određujete koja će\n da se pojavi na grafikonu. Dupli klik resetuje grafikon.", 
                                                            
-                                                           showarrow = F, xref='paper', yref='paper', 
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
                                                            
-                                                           xanchor='right', yanchor='auto', xshift=0, yshift=0, font=list(size=11)))
+                                                           xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0, font = list(size = 11)))
 ```
 
 
@@ -757,15 +827,18 @@ Ako podatke o broju odobrenih projekata ukrstimo sa onima koji govore da se, par
 Ukupna sredstva koja je država na svim nivoima opredelila za konkursno sufinansiranje medija u posmatranom periodu iznosi – `r format(sum(Projectmedia[,9]), big.mark=',')` evra. I tu je primetna uzlazna linija iz godine u godinu, pa su tako mediji i medijske organizacije 2015. godine dobili oko **9,6 miliona**, a 2016. bezmalo **10,1 milion evra**. U 2017. iznos je približan **10,8 miliona evra**, a 2018. – **11,7 miliona evra**. 2019. godine država interveniše putem konkursa u medijsku sferu sa čak **13,4 miliona evra**, da bi 2020. bio dosegnut rekord od čak **14,1 milion evra**.
 
 ```{r echo=FALSE}
+
+# Kreiranje line  charta  za trend dodele sredstava po godinama
+
 godinasredstvagraf <- ggplot (novacgod, aes(as.factor(GODINA), `SREDSTVA U EVRIMA`, label = Info))+
-          geom_point(color="#1DA460")+ 
-            geom_line(aes(group=1),colour="#1DA460")+
+          geom_point(color = "#1DA460")+ 
+            geom_line(aes(group = 1),colour = "#1DA460")+
           
             ggtitle("Trend dodele sredstava po godinama za sve organe")+
           
             xlab("")+
   
-            scale_y_continuous(name="Sredstva u evrima", labels = comma)+
+            scale_y_continuous(name = "Sredstva u evrima", labels = comma)+
   
             theme(legend.position = "bottom",
                   
@@ -786,22 +859,23 @@ godinasredstvagraf <- ggplot (novacgod, aes(as.factor(GODINA), `SREDSTVA U EVRIM
           
           layout( annotations = list(x = 1, y = -0.2, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
                                                            
-                                                           showarrow = F, xref='paper', yref='paper', 
-                                                           xanchor='right', yanchor='auto', xshift=0, yshift=0, font=list(size=11)))
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
+                                                           xanchor = 'right', yanchor ='auto', xshift = 0, yshift = 0, font = list(size = 11)))
 ```
 
 
 Lokalne samouprave su u svrhu konkursnog sufinansiranja izdvojile ukupno nešto više od **54 miliona evra**, Ministarstvo – **13,1 milion**, dok je vojvođanski Sekretarijat na medijske konkurse tokom šest godina potrošio **2,5 miliona evra**. Treba, međutim, naglasiti da ovaj poslednji organ vlasti izdvaja značajna sredstva (oko 300 miliona dinara godišnje) za medije na jezicima nacionalnih manjina kojima su osnivači manjinski nacionalni saveti, ali ne putem konkursa već putem direktnog davanja, što ukazuje na nedoslednost postojeće medijske legislative.
 
 ```{r echo=FALSE}
+# Kreiranje bar charta  za ukupno dodeljena sredstva prema organu vlasti
 
-graforganinovac<- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,-`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`,label = `Info`))+
+graforganinovac <- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, -`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`, label = `Info`))+
           
-            geom_bar (stat = "identity",fill = c("#9F2A63FF","#F57D15FF","#FAC127FF"))+
+            geom_bar (stat = "identity",fill = c("#9F2A63FF", "#F57D15FF", "#FAC127FF"))+
             
             xlab ("Organ koji je raspisao konkurs")+
           
-             scale_y_continuous(name="Sredstva u evrima", labels = comma)+
+             scale_y_continuous(name = "Sredstva u evrima", labels = comma)+
           
             ggtitle ("Ukupno dodeljena sredstva\n od 2015-2020. godine od svih organa")+
           
@@ -815,9 +889,9 @@ graforganinovac<- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RA
                    
                    axis.text.x = element_blank(),
                    
-                   axis.ticks=element_blank(),
+                   axis.ticks = element_blank(),
                    
-                   plot.margin=unit(c(1,1,1.5,1.2),"cm"))
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
         
         ggplotly(graforganinovac, tooltip = "Info") %>%
           
@@ -838,7 +912,9 @@ graforganinovac<- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RA
 Kada posmatramo vrednost odobrenih projekata po organima vlasti, primetićemo da se opredeljeni iznos Ministarstva uvećao, ali ne značajno (2015 –`r novacgodorgan1[7,3]`, 2016 – `r novacgodorgan1[8,3]`, 2017 – `r novacgodorgan1[9,3]`, 2018 – `r novacgodorgan1[10,3]`, 2019 – `r novacgodorgan1[11,3]`, 2020 – `r novacgodorgan1[12,3]` evra), da su davanja Sekretarijata, ako izuzmemo 2016. godinu, manje-više konstantna (2015 – `r novacgodorgan1[13,3]`, 2016 – `r novacgodorgan1[14,3]`, 2017 – `r novacgodorgan1[15,3]`, 2018 – `r novacgodorgan1[16,3]`, 2019 – `r novacgodorgan1[17,3]`, 2020 – `r novacgodorgan1[18,3]` evra), a da se vrednost medijskih projekata koji podržavaju lokalne samouprave značajno uvećao u periodu od 2015. godine do septembra ove godine (2015 – `r novacgodorgan1[1,3]`, 2016 – `r novacgodorgan1[2,3]`, 2017 – `r novacgodorgan1[3,3]`, 2018 – `r novacgodorgan1[4,3]`, 2019 – `r novacgodorgan1[5,3]`, 2020 – `r novacgodorgan1[6,3]`). 
 
 ```{r echo=FALSE}
- gg <- ggplot (novacgodorgan, aes(GODINA, `SREDSTVA U EVRIMA`, group = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, label = Info, color =`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)) +
+# Kreiranje line charta  za trend davanja novca po godinama prema organu koji je dodelio sredstva
+
+ gg <- ggplot (novacgodorgan, aes(GODINA, `SREDSTVA U EVRIMA`, group = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, label = Info, color = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)) +
           
             geom_line(position = position_dodge(0.1))+
           
@@ -846,9 +922,9 @@ Kada posmatramo vrednost odobrenih projekata po organima vlasti, primetićemo da
           
             ggtitle("Trend davanja novca prema organu")+
           
-            scale_color_manual(values=c("#9F2A63FF","#F57D15FF","#FAC127FF")) +
+            scale_color_manual(values = c("#9F2A63FF", "#F57D15FF", "#FAC127FF")) +
           
-            scale_y_continuous(name="Sredstva u evrima", labels = comma)+
+            scale_y_continuous(name = "Sredstva u evrima", labels = comma)+
           
             xlab("")+
           
@@ -867,15 +943,15 @@ Kada posmatramo vrednost odobrenih projekata po organima vlasti, primetićemo da
         
         ggplotly(gg, tooltip = "label") %>%
           
-            config(displayModeBar=FALSE) %>%
+            config(displayModeBar = FALSE) %>%
           
           layout(legend = list(title = list(text = 'Organ'), orientation = "h", x = 0, y =-0.3), annotations = 
                    
                                                       list(x = 1, y = -0.3, text = "*Klikom na teme u legendi ispod određujete koja će\n da se pojavi na grafikonu. Dupli klik resetuje grafikon.", 
                                                            
-                                                           showarrow = F, xref='paper', yref='paper', 
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
                                                            
-                                                           xanchor='right', yanchor='auto', xshift=0, yshift=0, font=list(size=11)))
+                                                           xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0, font = list(size = 11)))
 ```
 
 
@@ -884,8 +960,9 @@ Pet gradova koji su izdvojili najveća sredstva za konkursno sufinansiranje u po
 
 Interesantno je posmatrati koliko su sredstava za informisanje u proteklom periodu izdvojile pojedine lokalne samouprave u odnosu na broj stanovnika koji žive na njihovoj teritoriji. U ovu analizu nismo uključili lokalne samouprave koje uopšte nisu raspisivale konkurs za medijske sadržaje, niti gradske opštine (beogradske i niške) zbog njihove specifičnosti. Najviše sredstava za javni interes u sferi javnog informisanja, po glavi stanovnika, izdvojila je opština `r popopstinetop[1,1]` (`r popopstinetop[1,4]` evra per capita), sledi `r popopstinetop[2,1]` (`r popopstinetop[2,4]`), `r popopstinetop[3,1]` (`r popopstinetop[3,4]`), `r popopstinetop[4,1]` (`r popopstinetop[4,4]`) i `r popopstinetop[5,1]` (`r popopstinetop[5,4]`). Najmanje sredstava u periodu od šest godina potrošila je opština `r popopstinelow[1,1]` (`r popopstinelow[1,4]` per capita), `r popopstinelow[2,1]` (`r popopstinelow[2,4]`), `r popopstinelow[3,1]` (`r popopstinelow[3,4]`), `r popopstinelow[4,1]` (`r popopstinelow[4,4]`) i `r popopstinelow[5,1]` (`r popopstinelow[5,4]`).
 ```{r echo=FALSE}
+# Kreiranje bar charta  za  5 opstina koje su dale najvise i 5 opstina koje su dale najmanje sredstava per capita
 
-grafpopopstinetop<- ggplot (data = popopstinetop, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,-`Po broju stanovnika`), y = `Po broju stanovnika`,label = `Info`))+
+grafpopopstinetop <- ggplot (data = popopstinetop, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, -`Po broju stanovnika`), y = `Po broju stanovnika`,label = `Info`))+
           
             geom_bar (stat = "identity",fill="#cc6a70ff")+
             
@@ -905,18 +982,18 @@ grafpopopstinetop<- ggplot (data = popopstinetop, aes (x = reorder(`ORGAN KOJI R
                    
                    axis.text.x = element_text(angle = 30),
                    
-                   axis.ticks=element_blank(),
+                   axis.ticks = element_blank(),
                    
-                   plot.margin=unit(c(1,1,1.5,1.2),"cm"))
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
         
      plot1<-   ggplotly(grafpopopstinetop, tooltip = "Info") %>%
           
             config(displayModeBar = FALSE) 
 
       
-        grafpopopstinelow<- ggplot (data = popopstinelow, aes (reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,`Po broju stanovnika`), y = `Po broju stanovnika`,label = `Info`))+
+        grafpopopstinelow <- ggplot (data = popopstinelow, aes (reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, `Po broju stanovnika`), y = `Po broju stanovnika`,label = `Info`))+
           
-            geom_bar (stat = "identity",fill="#cc6a70ff")+
+            geom_bar (stat = "identity",fill = "#cc6a70ff")+
             
             xlab ("")+
           
@@ -934,11 +1011,11 @@ grafpopopstinetop<- ggplot (data = popopstinetop, aes (x = reorder(`ORGAN KOJI R
                    
                    axis.text.x = element_text(angle = 30),
                    
-                   axis.ticks=element_blank(),
+                   axis.ticks = element_blank(),
                    
-                   plot.margin=unit(c(1,1,1.5,1.2),"cm"))
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
         
-      plot2<-   ggplotly(grafpopopstinelow, tooltip = "Info") %>%
+      plot2 <- ggplotly(grafpopopstinelow, tooltip = "Info") %>%
           
             config(displayModeBar = FALSE) %>%
           
@@ -963,13 +1040,15 @@ Na konkursima koje je raspisalo Ministarstvo najviše sredstava je dobila `r pod
 Na lokalnom nivou je primećeno da neki mediji dobijaju sredstva i na teritorijama onih lokalnih samouprava na kojima nisu programski prisutni, bar ne na značajnom nivou. Kada posmatramo sve lokalne samouprave, najviše sredstava na njihovim konkursima je povukla `r podnosiociloksam[1,1]` (`r podnosiociloksam[1,2]` evra), slede `r podnosiociloksam[2,1]` (`r podnosiociloksam[2,2]`), `r podnosiociloksam[3,1]` (`r podnosiociloksam[3,2]`) i `r podnosiociloksam[4,1]` (`r podnosiociloksam[4,2]`). Iz svega ovoga se može zaključiti da postoje pojedini mediji koji su favorizovani na lokalnom nivou, dok na pokrajinskom i republičkom povlače znatno manja sredstva.
 
 ```{r echo=FALSE}
-bci <-  ggplot (data = barchartpodnosiocizasve, aes (x = reorder(`PODNOSILAC PROJEKTA`,-`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`,label = `Info`))+
+# Kreiranje bar charta  za top 5 podnosilaca koji su dobili navise sredstava od svih organa koji raspisuju konkurse
+
+bci <-  ggplot (data = barchartpodnosiocizasve, aes (x = reorder(`PODNOSILAC PROJEKTA`, -`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`,label = `Info`))+
         
         geom_bar (stat = "identity",fill = "#E95420")+
         
         xlab ("Podnosilac projekta")+
         
-        scale_y_continuous(name="Sredstva od 2015-2020. u evrima", labels = comma)+
+        scale_y_continuous(name = "Sredstva od 2015-2020. u evrima", labels = comma)+
         
         ggtitle ("Pet podnosilaca\n koji su dobili najviše sredstava\n od svih organa")+
         
@@ -984,9 +1063,9 @@ bci <-  ggplot (data = barchartpodnosiocizasve, aes (x = reorder(`PODNOSILAC PRO
                
                axis.text.x = element_blank(),
                
-               axis.ticks=element_blank(),
+               axis.ticks = element_blank(),
                
-               plot.margin=unit(c(1.5,1,1.5,1.2),"cm"))
+               plot.margin = unit(c(1.5,1,1.5,1.2), "cm"))
       
       ggplotly( bci, tooltip = "Info") %>%
         
@@ -1009,7 +1088,9 @@ Vest da dominiraju klasični informativni sadržaji je logična, ali dubinskom a
 Kao što se vidi na grafikonu, ubedljivo najviše novaca država izdvaja za informativni program, maltene dvostruko više u odnosu na ostale medijske sadržaje. 2015. godine organi vlasti su izdvojili `r info2015sredstva` evra, a uz konstantni porast taj iznos 2020. je – `r info2020sredstva`. Primera radi, za sve ostale sadržaje te godine izdvojeno je `r sumabezinfo2020` evra. Proteklih godina uvećano je izdvajanje i za kulturu i obrazovanje (drugi tematski okvir po ukupnom izdvajanju), pa je sa `r kult2015sredstva` evra 2015. godine ono doseglo `r kult2020sredstva`. Interesantno je da tokom protekle tri godine beležimo, iako neznatan, pad iznosa konkursnog sufinansiranja u oblasti sadržaja na manjinskom jeziku. 2018. godine on je iznosio `r manjine2018sredstva` evra, 2019. je pao na `r manjine2019sredstva`, da bi ove godine on bio – `r manjine2020sredstva` evra.
 
 ```{r echo=FALSE}
- linechart<- ggplot (linechartteme, aes(GODINA, `SREDSTVA U EVRIMA`, group = `TEMA PROJEKTA`, label = Info, color =`TEMA PROJEKTA`)) +
+# Kreiranje line charta  za  koliko je sredstava dodeljeno po temama po godinama 
+
+ linechart <- ggplot (linechartteme, aes(GODINA, `SREDSTVA U EVRIMA`, group = `TEMA PROJEKTA`, label = Info, color = `TEMA PROJEKTA`)) +
           
             geom_line(position = position_dodge(0.1))+
           
@@ -1019,7 +1100,7 @@ Kao što se vidi na grafikonu, ubedljivo najviše novaca država izdvaja za info
           
             scale_color_viridis(discrete = TRUE) +
           
-             scale_y_continuous(name="Sredstva od 2015-2020. u evrima", labels = comma)+
+             scale_y_continuous(name = "Sredstva od 2015-2020. u evrima", labels = comma)+
           
             xlab("")+
           
@@ -1038,15 +1119,15 @@ Kao što se vidi na grafikonu, ubedljivo najviše novaca država izdvaja za info
         
         ggplotly(linechart, tooltip = "label") %>%
           
-            config(displayModeBar=FALSE) %>%
+            config(displayModeBar = FALSE) %>%
           
           layout(legend = list(title = list(text = 'Teme projekata'), orientation = "h", x = 0, y =-0.3), annotations = 
                    
                                                       list(x = 1, y = -0.3, text = "*Klikom na teme u legendi ispod određujete koja će\n da se pojavi na grafikonu. Dupli klik resetuje grafikon.", 
                                                            
-                                                           showarrow = F, xref='paper', yref='paper', 
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
                                                            
-                                                           xanchor='right', yanchor='auto', xshift=0, yshift=0, font=list(size=10)))
+                                                           xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0, font = list(size = 10)))
   
 ```
 
@@ -1055,19 +1136,26 @@ Kada posmatramo zbirne iznose za sve godine i sve podnosioce, za `r zatekstteme[
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE }
 
+# Kreiranje pie charta  udeo zastupljenosti tema za sve konkurse koji su obradjeni na svim nivoima vlasti
 
-pcpall<-  Zastupljenosttema%>%
-      plot_ly(labels = ~Info, values = ~`SREDSTVA U EVRIMA`, hoverinfo="label",marker = list(colors =Zastupljenosttema$boje),textinfo="none") %>%
+pcpall <-  Zastupljenosttema %>%
+      plot_ly(labels = ~Info, values = ~`SREDSTVA U EVRIMA`, hoverinfo = "label",marker = list(colors = Zastupljenosttema$boje), textinfo = "none") %>%
       
       add_pie() %>%
+  
       config(displayModeBar = FALSE) %>%
       
       layout(showlegend = F,
+             
              title = list(text =  "Prikaz učešća dodeljenih sredstava po temama za\n sve godine"),
-             margin=list(t = 100),
-             paper_bgcolor='rgba(0,0,0,0)',
-             plot_bgcolor='rgba(0,0,0,0)',
+             margin = list(t = 100),
+             
+             paper_bgcolor = 'rgba(0,0,0,0)',
+             
+             plot_bgcolor = 'rgba(0,0,0,0)',
+             
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             
              yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
   
 pcpall  
