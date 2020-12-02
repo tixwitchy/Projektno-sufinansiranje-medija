@@ -685,7 +685,7 @@ Pojedini medijski stručnjaci su 2015. nazivali i „nultom godinom“ primene z
 U periodu od početka 2015. do kraja septembra 2020. godine ukupan broj odobrenih medijskih projekata na svim nivoima iznosi `r format(nrow(brojprojekata),big.mark=',', digits = 0, nsmall=0, scientific = FALSE)`, a od toga je Ministarstvo finansiralo   `r brojprojekataorgan1[2,2]`, Sekretarijat `r brojprojekataorgan1[3,2] `, a lokalne samouprave (njih ukupno `r brojopstina`) – `r brojprojekataorgan1[1,2]`. Treba imati u vidu da `r nrow(opstinebezkonkursa) ` lokalnih samouprava od `r brojopstina` analizirane (`r opstinebezkonkursa[1,1]`, `r opstinebezkonkursa[2,1]`, `r opstinebezkonkursa[3,1]`, `r opstinebezkonkursa[4,1]`, `r opstinebezkonkursa[5,1]`, `r opstinebezkonkursa[6,1]`, `r opstinebezkonkursa[7,1]`, `r opstinebezkonkursa[8,1]`, `r opstinebezkonkursa[9,1]`, `r opstinebezkonkursa[10,1]` i `r opstinebezkonkursa[11,1]`) u periodu od 2015. do 2020. nisu raspisali niti jedan konkurs. Konkurse nije objavljivala niti većina gradskih opština, ali one nisu (izuzev beogradskih opština Obrenovac, Mladenovac i Lazarevac i niških Medijana, Crveni Krst i Pantelej) uzimane u obzir, jer po tumačenju zakona nisu ni bile u obavezi da konkursno sufinansiraju medije. Pred vama su interaktivni grafikoni. Prelaskom kursora preko njih videćete informacije.
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.cap = "Grafikon 1.1"}
 
 # Kreiranje bar charta  za broj projekata prema organu koji je dodelio sredstva
 
@@ -734,7 +734,7 @@ brojprojekatagraf <- ggplot (data = brojprojekataorgan, aes (x = reorder(`ORGAN 
 Broj odobrenih medijskih projekata povećava se iz godine u godinu. Ukupan broj podržanih projekata na svim nivoima vlasti tokom 2015. godine iznosio je `r brojprojekatagodina1[1,2]`, da bi kasnije iz godine u godinu rastao (2016 – `r brojprojekatagodina[2,2]`, 2017 – `r brojprojekatagodina1[3,2]`, 2018 – `r brojprojekatagodina1[4,2]`, 2019 – `r brojprojekatagodina1[5,2]`). To što je 2020. godine zabeležen neznatan pad (`r brojprojekatagodina1[6,2]`) možda je posledica činjenice da ovo istraživanje nije obuhvatilo poslednji kvartal te godine.
 
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, warning=FALSE, fig.cap ="Grafikon 1.2"}
 
 # Kreiranje line charta  za broj projekata po godinama od svih organa koji su raspisali konkurs
 
@@ -775,7 +775,7 @@ brojprojekatagrafgod <- ggplot (brojprojekatagodina, aes(as.factor(GODINA), `BRO
 
 Beležimo postepeni rast broja odobrenih medijskih projekata od Ministarstva (2015 –`r brojprojekataorgangod1[7,3]`, 2016 – `r brojprojekataorgangod1[8,3]`, 2017 – `r brojprojekataorgangod1[9,3]`, 2018 – `r brojprojekataorgangod1[10,3]`, 2019 – `r brojprojekataorgangod1[11,3]`, 2020 – `r brojprojekataorgangod1[12,3]`), a realizovani projekti na nivou lokalnih samouprava su takoreći udvostručeni u posmatranom periodu (2015 – `r brojprojekataorgangod1[1,3]`, 2016 – `r brojprojekataorgangod1[2,3]`, 2017 – `r brojprojekataorgangod1[3,3]`, 2018 – `r brojprojekataorgangod1[4,3]`, 2019 – `r brojprojekataorgangod1[5,3]`, 2020 – `r brojprojekataorgangod1[6,3]`). Uvećan je i broj projekata koji odobrava Sekretarijat (2015 – `r brojprojekataorgangod1[13,3]`, 2016 – `r brojprojekataorgangod1[14,3]`, 2017 – `r brojprojekataorgangod1[15,3]`, 2018 – `r brojprojekataorgangod1[16,3]`, 2019 – `r brojprojekataorgangod1[17,3]`, 2020 – `r brojprojekataorgangod1[18,3]`). Za sve ove podatke postoji ograda vezana za 2020. godinu, koja, kao što smo rekli, nije kompletno tretirana.
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.cap = "Grafikon 1.3"}
 
 # Kreiranje line charta  za broj projekata po godinama prema organu koji je dodelio sredstva
 
@@ -826,7 +826,7 @@ Ako podatke o broju odobrenih projekata ukrstimo sa onima koji govore da se, par
 
 Ukupna sredstva koja je država na svim nivoima opredelila za konkursno sufinansiranje medija u posmatranom periodu iznosi – `r format(sum(Projectmedia[,9]), big.mark=',')` evra. I tu je primetna uzlazna linija iz godine u godinu, pa su tako mediji i medijske organizacije 2015. godine dobili oko **9,6 miliona**, a 2016. bezmalo **10,1 milion evra**. U 2017. iznos je približan **10,8 miliona evra**, a 2018. – **11,7 miliona evra**. 2019. godine država interveniše putem konkursa u medijsku sferu sa čak **13,4 miliona evra**, da bi 2020. bio dosegnut rekord od čak **14,1 milion evra**.
 
-```{r echo=FALSE}
+```{r echo=FALSE,fig.cap="Grafikon 2.1"}
 
 # Kreiranje line  charta  za trend dodele sredstava po godinama
 
@@ -866,7 +866,7 @@ godinasredstvagraf <- ggplot (novacgod, aes(as.factor(GODINA), `SREDSTVA U EVRIM
 
 Lokalne samouprave su u svrhu konkursnog sufinansiranja izdvojile ukupno nešto više od **54 miliona evra**, Ministarstvo – **13,1 milion**, dok je vojvođanski Sekretarijat na medijske konkurse tokom šest godina potrošio **2,5 miliona evra**. Treba, međutim, naglasiti da ovaj poslednji organ vlasti izdvaja značajna sredstva (oko 300 miliona dinara godišnje) za medije na jezicima nacionalnih manjina kojima su osnivači manjinski nacionalni saveti, ali ne putem konkursa već putem direktnog davanja, što ukazuje na nedoslednost postojeće medijske legislative.
 
-```{r echo=FALSE}
+```{r echo=FALSE,fig.cap="Grafikon 2.2"}
 # Kreiranje bar charta  za ukupno dodeljena sredstva prema organu vlasti
 
 graforganinovac <- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, -`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`, label = `Info`))+
@@ -911,7 +911,7 @@ graforganinovac <- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI R
 
 Kada posmatramo vrednost odobrenih projekata po organima vlasti, primetićemo da se opredeljeni iznos Ministarstva uvećao, ali ne značajno (2015 –`r novacgodorgan1[7,3]`, 2016 – `r novacgodorgan1[8,3]`, 2017 – `r novacgodorgan1[9,3]`, 2018 – `r novacgodorgan1[10,3]`, 2019 – `r novacgodorgan1[11,3]`, 2020 – `r novacgodorgan1[12,3]` evra), da su davanja Sekretarijata, ako izuzmemo 2016. godinu, manje-više konstantna (2015 – `r novacgodorgan1[13,3]`, 2016 – `r novacgodorgan1[14,3]`, 2017 – `r novacgodorgan1[15,3]`, 2018 – `r novacgodorgan1[16,3]`, 2019 – `r novacgodorgan1[17,3]`, 2020 – `r novacgodorgan1[18,3]` evra), a da se vrednost medijskih projekata koji podržavaju lokalne samouprave značajno uvećao u periodu od 2015. godine do septembra ove godine (2015 – `r novacgodorgan1[1,3]`, 2016 – `r novacgodorgan1[2,3]`, 2017 – `r novacgodorgan1[3,3]`, 2018 – `r novacgodorgan1[4,3]`, 2019 – `r novacgodorgan1[5,3]`, 2020 – `r novacgodorgan1[6,3]`). 
 
-```{r echo=FALSE}
+```{r echo=FALSE,fig.cap="Grafikon 2.3"}
 # Kreiranje line charta  za trend davanja novca po godinama prema organu koji je dodelio sredstva
 
  gg <- ggplot (novacgodorgan, aes(GODINA, `SREDSTVA U EVRIMA`, group = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, label = Info, color = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)) +
@@ -959,7 +959,7 @@ Kada posmatramo vrednost odobrenih projekata po organima vlasti, primetićemo da
 Pet gradova koji su izdvojili najveća sredstva za konkursno sufinansiranje u posmatranom periodu su `r Opstinesuma1[1,1]` (`r Opstinesuma1[1,2]` evra), `r Opstinesuma1[2,1]` (`r Opstinesuma1[2,2]`), `r Opstinesuma1[3,1]` (`r Opstinesuma1[3,2]`), `r Opstinesuma1[4,1]` (`r Opstinesuma1[4,2]`) i `r Opstinesuma1[5,1]` (`r Opstinesuma1[5,2]`). Manje-više, ovi podaci prate veličinu tih lokalnih samouprava, uz izuzetak Kragujevca, koji svih ovih godina nije izdvojio niti dinara za konkursno sufinansiranje javnog interesa u sferi javnog informisanja. Uzgred, Kragujevac je na druge načine finansirao Radio-televiziju Kragujevac, kojoj je poništena privatizacija i vraćena je u „vlasništvo“ grada. 
 
 Interesantno je posmatrati koliko su sredstava za informisanje u proteklom periodu izdvojile pojedine lokalne samouprave u odnosu na broj stanovnika koji žive na njihovoj teritoriji. U ovu analizu nismo uključili lokalne samouprave koje uopšte nisu raspisivale konkurs za medijske sadržaje, niti gradske opštine (beogradske i niške) zbog njihove specifičnosti. Najviše sredstava za javni interes u sferi javnog informisanja, po glavi stanovnika, izdvojila je opština `r popopstinetop[1,1]` (`r popopstinetop[1,4]` evra per capita), sledi `r popopstinetop[2,1]` (`r popopstinetop[2,4]`), `r popopstinetop[3,1]` (`r popopstinetop[3,4]`), `r popopstinetop[4,1]` (`r popopstinetop[4,4]`) i `r popopstinetop[5,1]` (`r popopstinetop[5,4]`). Najmanje sredstava u periodu od šest godina potrošila je opština `r popopstinelow[1,1]` (`r popopstinelow[1,4]` per capita), `r popopstinelow[2,1]` (`r popopstinelow[2,4]`), `r popopstinelow[3,1]` (`r popopstinelow[3,4]`), `r popopstinelow[4,1]` (`r popopstinelow[4,4]`) i `r popopstinelow[5,1]` (`r popopstinelow[5,4]`).
-```{r echo=FALSE}
+```{r echo=FALSE, fig.cap="Grafikon 2.4"}
 # Kreiranje bar charta  za  5 opstina koje su dale najvise i 5 opstina koje su dale najmanje sredstava per capita
 
 grafpopopstinetop <- ggplot (data = popopstinetop, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, -`Po broju stanovnika`), y = `Po broju stanovnika`,label = `Info`))+
@@ -1039,7 +1039,7 @@ Na konkursima koje je raspisalo Ministarstvo najviše sredstava je dobila `r pod
 
 Na lokalnom nivou je primećeno da neki mediji dobijaju sredstva i na teritorijama onih lokalnih samouprava na kojima nisu programski prisutni, bar ne na značajnom nivou. Kada posmatramo sve lokalne samouprave, najviše sredstava na njihovim konkursima je povukla `r podnosiociloksam[1,1]` (`r podnosiociloksam[1,2]` evra), slede `r podnosiociloksam[2,1]` (`r podnosiociloksam[2,2]`), `r podnosiociloksam[3,1]` (`r podnosiociloksam[3,2]`) i `r podnosiociloksam[4,1]` (`r podnosiociloksam[4,2]`). Iz svega ovoga se može zaključiti da postoje pojedini mediji koji su favorizovani na lokalnom nivou, dok na pokrajinskom i republičkom povlače znatno manja sredstva.
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.cap="Grafikon 2.5"}
 # Kreiranje bar charta  za top 5 podnosilaca koji su dobili navise sredstava od svih organa koji raspisuju konkurse
 
 bci <-  ggplot (data = barchartpodnosiocizasve, aes (x = reorder(`PODNOSILAC PROJEKTA`, -`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`,label = `Info`))+
@@ -1087,7 +1087,7 @@ Vest da dominiraju klasični informativni sadržaji je logična, ali dubinskom a
 
 Kao što se vidi na grafikonu, ubedljivo najviše novaca država izdvaja za informativni program, maltene dvostruko više u odnosu na ostale medijske sadržaje. 2015. godine organi vlasti su izdvojili `r info2015sredstva` evra, a uz konstantni porast taj iznos 2020. je – `r info2020sredstva`. Primera radi, za sve ostale sadržaje te godine izdvojeno je `r sumabezinfo2020` evra. Proteklih godina uvećano je izdvajanje i za kulturu i obrazovanje (drugi tematski okvir po ukupnom izdvajanju), pa je sa `r kult2015sredstva` evra 2015. godine ono doseglo `r kult2020sredstva`. Interesantno je da tokom protekle tri godine beležimo, iako neznatan, pad iznosa konkursnog sufinansiranja u oblasti sadržaja na manjinskom jeziku. 2018. godine on je iznosio `r manjine2018sredstva` evra, 2019. je pao na `r manjine2019sredstva`, da bi ove godine on bio – `r manjine2020sredstva` evra.
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.cap="Grafikon 3.1"}
 # Kreiranje line charta  za  koliko je sredstava dodeljeno po temama po godinama 
 
  linechart <- ggplot (linechartteme, aes(GODINA, `SREDSTVA U EVRIMA`, group = `TEMA PROJEKTA`, label = Info, color = `TEMA PROJEKTA`)) +
@@ -1134,7 +1134,7 @@ Kao što se vidi na grafikonu, ubedljivo najviše novaca država izdvaja za info
 
 Kada posmatramo zbirne iznose za sve godine i sve podnosioce, za `r zatekstteme[1,1]` izdvojeno je ukupno `r zatekstteme[1,3]` evra ili `r zatekstteme[1,4]`% ukupno opredeljenih sredstava za konkursno sufinansiranje u periodu od 2015. do 2020. godine.Sledeća tema, `r zatekstteme[2,1]` je dobila `r zatekstteme[2,3]` evra ili `r zatekstteme[2,4]`% ukupnog šestogodišnjeg budžeta za medijske projekte. Slede projekti koji ne pripadaju niti jednoj klasifikaciji (`r zatekstteme[3,1]`, `r zatekstteme[3,3]` evra ili `r zatekstteme[3,4]`%), potom projekti koji se se odnose na `r zatekstteme[4,1]` (`r zatekstteme[4,3]` ili `r zatekstteme[4,4]`%), slede `r zatekstteme[5,1]` (`r zatekstteme[5,3]` ili `r zatekstteme[5,4]`%), `r zatekstteme[6,1]` (`r zatekstteme[6,3]` ili `r zatekstteme[6,4]`%), `r zatekstteme[7,1]` (`r zatekstteme[7,3]`ili `r zatekstteme[7,4]`%) i, na kraju, `r zatekstteme[8,1]` (`r zatekstteme[8,3]` ili `r zatekstteme[8,4]`%). Sredstva u visini od `r bezinfonovci` evra ili `r bezinfoprocenti` ukupnog novca otišla su na projekte za koje nismo uspeli detektovati temu, iz prostog razloga što na pojedinim Rešenjima o dodeli sredstava, na nivou lokalnih samouprava, nisu navedeni nazivi projekata. Na prethodnom grafikonu vidimo da je broj takvih rešenja u značajnom padu što je dobra vest.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE }
+```{r  fig.cap="Grafikon 3.2",fig.topcaption=TRUE, echo=FALSE, message=FALSE, warning=FALSE }
 
 # Kreiranje pie charta  udeo zastupljenosti tema za sve konkurse koji su obradjeni na svim nivoima vlasti
 
