@@ -48,11 +48,7 @@ brojprojekata <- Projectmedia %>%
 
 #Skracivanje naziva za Pokrajinski sekretarijat i spajanje svih upstina pod naziv Lokalne samouprave
 
-brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [brojprojekata$`ORGAN KOJI RASPISUJE
-
-KONKURS/OPŠTINA` == "Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski
-
-sekretarijat"
+brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` == "Pokrajinski sekretarijat za kulturu i javno informisanje"] <-"Pokrajinski sekretarijat"
 
 brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat"] <- "Lokalne samouprave"
 
@@ -123,7 +119,7 @@ brojprojekatagodina1$`BROJ PROJEKATA` <- format(brojprojekatagodina1$`BROJ PROJE
 
 brojopstina <- n_distinct(Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje"])
 
-#Ukupan broj opstina koje nisu raspisale konkurse za tekstualni deo izvestaja
+#Podskup za izvlacenje imena opstina koje nisu raspisale konkurse za tekstualni deo izvestaja
 
 opstinebezkonkursa <- Projectmedia %>%
   
@@ -134,22 +130,30 @@ opstinebezkonkursa <- Projectmedia %>%
   filter(`SREDSTVA U DINARIMA` == 0)
 
 
+#Podskup za kolicinu novca koja je ukupno data po godinama za grafikon
 
-novacgod<-brojprojekata%>%
-  group_by(GODINA)%>%
-  summarise(`SREDSTVA U EVRIMA`=sum(`SREDSTVA U EVRIMA`))%>%
-  mutate(Info= paste("<br>",
+novacgod <- brojprojekata %>%
+  
+  group_by(GODINA) %>%
+  
+  summarise(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  mutate(Info = paste("<br>",
                        
-                       "Godina:",GODINA,"<br>",
-                       "Ukupno dodeljenih sredstava:",format(`SREDSTVA U EVRIMA`,big.mark = ","),"eur<br>"
+                       "Godina:", GODINA, "<br>",
+                      
+                       "Ukupno dodeljenih sredstava:", format(`SREDSTVA U EVRIMA`, big.mark = ","), "eur<br>"
                         ))
   
+# Podskup ukupno dodeljenog novca prema organu koji je raspisao za grafikon
 
+#Iskljucivanje konkursa na kojima sredstva nisu dodeljena
 
-barchartorgani <- Projectmedia%>%
-    filter(`SREDSTVA U DINARIMA`!=0)
+barchartorgani <- Projectmedia %>%
+  
+    filter(`SREDSTVA U DINARIMA` != 0)
 
-#Promena imena u lokalne samouprave
+#Spajanje svih opstina pod naziv Lokalne samouprave
 
 barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Lokalne samouprave"
 
@@ -159,9 +163,11 @@ barchartorgani <- barchartorgani %>%
   
   group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
   
-    summarise(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`),n=n())%>%
+    summarise(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`),n = n())%>%
   
     arrange(desc(`SREDSTVA U EVRIMA`))
+
+#Skracivanje naziva Pokrajinskog sekretarijata
 
 barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski sekretarijat"
 
@@ -177,56 +183,80 @@ barchartorgani <- barchartorgani %>%
                       
                       "Broj projekata:",format(n,big.mark = ","), '<br>'))
 
-novacgodorgan<-Projectmedia
+
+#Dodela novca prema organu po godinama  koji je raspisao konkurs za grafikon
+
+novacgodorgan <- Projectmedia
+
+# #Skracivanje naziva za Pokrajinski sekretarijat i spajanje svih upstina pod naziv Lokalne samouprave
 
 novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Lokalne samouprave"
 
 novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski sekretarijat"
 
-novacgodorgan<-novacgodorgan %>%
-  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,GODINA)%>%
+#Podskup za dodeljen novac po organu po godinama za grafikon
+
+novacgodorgan <- novacgodorgan %>%
   
-  summarise(`SREDSTVA U EVRIMA`=sum(`SREDSTVA U EVRIMA`))%>%
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, GODINA) %>%
+  
+  summarise(`SREDSTVA U EVRIMA`=sum(`SREDSTVA U EVRIMA`)) %>%
   
   mutate(Info= paste("<br>",
                         "Organ koji raspisuje konkurs:", 
                       
                       `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
                      
-                       "Godina:",GODINA,"<br>",
-                       "Ukupno dodeljenih sredstava:",format(`SREDSTVA U EVRIMA`,big.mark = ","),"eur<br>"
+                       "Godina:", GODINA, "<br>",
+                     
+                       "Ukupno dodeljenih sredstava:", format(`SREDSTVA U EVRIMA`, big.mark = ","), "eur<br>"
                         ))
 
-novacgodorgan1<-novacgodorgan
-novacgodorgan1$`SREDSTVA U EVRIMA`<- format(novacgodorgan1$`SREDSTVA U EVRIMA`, big.mark = ",")
+#Ukupno dodeljen novac prema organu po godinama, formatiran za tekstualni deo izvestaja
+
+novacgodorgan1 <- novacgodorgan
+
+novacgodorgan1$`SREDSTVA U EVRIMA` <- format(novacgodorgan1$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+#top 5 opstina koje su izdvojile najvise novca za tekstualni deo izvestaja
 
 Opstinesuma<- Projectmedia %>%
   
   filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture") %>%
+  
    filter(`SREDSTVA U DINARIMA`!=0)%>%
   
   group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
   
-  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`))%>%
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
   
   arrange(desc(`SREDSTVA U EVRIMA`)) %>%
   
   top_n(5) 
 
+#formatiranje kolone sa sredstvima
+
 Opstinesuma1<-Opstinesuma
 
 Opstinesuma1$`SREDSTVA U EVRIMA`<- format(Opstinesuma1$`SREDSTVA U EVRIMA`, big.mark = ",")
 
+#Pravljenje podskupa za ukupno dodeljeni novca per capita za opstine top 5 najvise i 5 koje su dodelile najmanje
+
 Opstinesumasvi<- Projectmedia %>%
   
-  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture") %>%
-   filter(`SREDSTVA U DINARIMA`!=0)%>%
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno
+         
+         informisanje" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture") %>%
+  
+   filter(`SREDSTVA U DINARIMA` != 0) %>%
   
   group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
   
   summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`))
 
-Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`<-toupper(Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
+#Pretvaranje naziva opstina u velika slova da bi se spojilo sa excel tabelom (population) -broj stanovnika
+
+Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` <- toupper(Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
 population<-read_excel("population.xlsx")
 
 popopstine<-left_join(Opstinesumasvi,population)
@@ -261,20 +291,6 @@ popopstinelow <- popopstine1%>%
                       "Dodeljeno novca po glavi stanovnika:",`Po broju stanovnika`, 'eur<br>',
                       "Ukupno novca:",format(`SREDSTVA U EVRIMA`,big.mark = ","), 'eur<br>'))
 
-#popopstinesuma <- popopstine%>%
- # arrange(desc(`SREDSTVA U EVRIMA`))%>%
- #top_n(18,`SREDSTVA U EVRIMA`)%>%
-  # mutate(`Po broju stanovnika`= round(`SREDSTVA U EVRIMA`/POPULACIJA,2))%>%
-  #mutate(Info=paste('<br>',
-                      
-                    #  `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
-                     # "Dodeljeno novca po glavi stanovnika:",`Po broju stanovnika`, 'eur<br>',
-                      #"Ukupno novca:",format(`SREDSTVA U EVRIMA`,big.mark = ","), 'eur<br>'))
-
-
-#popopstine18<-popopstinesuma%>%
- # arrange(desc(`Po broju stanovnika`))%>%
-  #top_n(18,`Po broju stanovnika`)
 
 barchartpodnosiocizasve <- Projectmedia%>%
   
@@ -464,25 +480,6 @@ manjine2018sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA P
 manjine2019sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Manjinski sadržaj" & linechartteme1 $`GODINA`== 2019]
 
 manjine2020sredstva<-linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA`=="Manjinski sadržaj" & linechartteme1 $`GODINA`== 2020 ]
-
-
-yearssredstvaloksam <- Projectmedia %>%
-  
-  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje"& `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture") %>%
- 
-  
-  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,`GODINA`) %>%
-  
-  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
-filter(GODINA>2018)%>%
-  
-  ungroup() 
-
-trendrastaloksam<-yearssredstvaloksam $`SREDSTVA U EVRIMA`[yearssredstvaloksam$`GODINA`== 2020] - yearssredstvaloksam$`SREDSTVA U EVRIMA`[yearssredstvaloksam$`GODINA`== 2019]
-
-trendrastaloksam<-trendrastaloksam[trendrastaloksam>0]
-
-trendrastaloksam<-length(trendrastaloksam)
 
 
 ```
