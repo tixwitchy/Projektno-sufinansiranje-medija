@@ -12,6 +12,19 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+#Ukoliko nemate prethodno instalirane pakete obrisite tarabu u narednim redovima i instalirajte ih
+
+#install.packages("tidyverse")
+#install.packages("readxl")
+#install.packages("plotly")
+#install.packages("scales")
+#install.packages("viridis")
+#install.packages("lubridate")
+#install.packages("writexl")
+#install.packages("stringi")
+#install.packages("crosstalk")
+
+#Instaliranje paketa se radi samo prvi put kada se koriste, a da bi im se pristupilo koristi se funkcija library
 
 library(tidyverse)
 library(readxl)
