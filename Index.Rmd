@@ -837,7 +837,7 @@ Ako podatke o broju odobrenih projekata ukrstimo sa onima koji govore da se, par
 
 ### Vrednosti projekata {align=justify}
 
-Ukupna sredstva koja je država na svim nivoima opredelila za konkursno sufinansiranje medija u posmatranom periodu iznosi – `r format(sum(Projectmedia[,9]), big.mark=',')` evra. I tu je primetna uzlazna linija iz godine u godinu, pa su tako mediji i medijske organizacije 2015. godine dobili oko **9,6 miliona**, a 2016. bezmalo **10,1 milion evra**. U 2017. iznos je približan **10,8 miliona evra**, a 2018. – **11,7 miliona evra**. 2019. godine država interveniše putem konkursa u medijsku sferu sa čak **13,4 miliona evra**, da bi 2020. bio dosegnut rekord od čak **14,1 milion evra**.
+Ukupna sredstva koja je država na svim nivoima opredelila za konkursno sufinansiranje medija u posmatranom periodu iznosi – `r format(sum(Projectmedia[,9]), big.mark=',')` evra. I tu je primetna uzlazna linija iz godine u godinu, pa su tako mediji i medijske organizacije 2015. godine dobili oko **9,6 miliona**, a 2016. bezmalo **10,1 milion evra**. U 2017. iznos je približan **10,8 miliona evra**, a 2018. – **12,2 miliona evra**. 2019. godine država interveniše putem konkursa u medijsku sferu sa čak **13,4 miliona evra**, da bi 2020. bio dosegnut rekord od čak **14,1 milion evra**.
 
 ```{r echo=FALSE,fig.cap="Grafikon 2.1"}
 
@@ -877,7 +877,7 @@ godinasredstvagraf <- ggplot (novacgod, aes(as.factor(GODINA), `SREDSTVA U EVRIM
 ```
 
 
-Lokalne samouprave su u svrhu konkursnog sufinansiranja izdvojile ukupno nešto više od **54 miliona evra**, Ministarstvo – **13,1 milion**, dok je vojvođanski Sekretarijat na medijske konkurse tokom šest godina potrošio **2,5 miliona evra**. Treba, međutim, naglasiti da ovaj poslednji organ vlasti izdvaja značajna sredstva (oko 300 miliona dinara godišnje) za medije na jezicima nacionalnih manjina kojima su osnivači manjinski nacionalni saveti, ali ne putem konkursa već putem direktnog davanja, što ukazuje na nedoslednost postojeće medijske legislative.
+Lokalne samouprave su u svrhu konkursnog sufinansiranja izdvojile ukupno skoro **55 miliona evra**, Ministarstvo – **13,1 milion**, dok je vojvođanski Sekretarijat na medijske konkurse tokom šest godina potrošio **2,5 miliona evra**. Treba, međutim, naglasiti da ovaj poslednji organ vlasti izdvaja značajna sredstva (oko 300 miliona dinara godišnje) za medije na jezicima nacionalnih manjina kojima su osnivači manjinski nacionalni saveti, ali ne putem konkursa već putem direktnog davanja, što ukazuje na nedoslednost postojeće medijske legislative.
 
 ```{r echo=FALSE,fig.cap="Grafikon 2.2"}
 # Kreiranje bar charta  za ukupno dodeljena sredstva prema organu vlasti
