@@ -1,3 +1,19 @@
+#Ukoliko nemate prethodno instalirane pakete obrisite tarabu u narednim redovima i instalirajte ih
+#install.packages("shiny")
+#install.packages("tidyverse")
+#install.packages("readxl")
+#install.packages("shinythemes")
+#install.packages("shinyWidgets")
+#install.packages("plotly")
+#install.packages("scales")
+#install.packages("viridis")
+#install.packages("crosstalk")
+#install.packages("lubridate")
+#install.packages("writexl")
+#install.packages("shinycssloaders")
+
+#Instaliranje paketa se radi samo prvi put kada se koriste, a da bi im se pristupilo koristi se funkcija library
+
 library(shiny)
 library(tidyverse)
 library(readxl)
