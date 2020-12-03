@@ -185,7 +185,7 @@ barcharttop4podnosioci <- Projectmedia %>%
     
 barcharttop4podnosioci$`PODNOSILAC PROJEKTA`[barcharttop4podnosioci$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA NOVI PAZAR DOO NOVI PAZAR"] <- "RADIO TELEVIZIJA NOVI PAZAR"
 barcharttop4podnosioci$`PODNOSILAC PROJEKTA`[barcharttop4podnosioci$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA BELLE AMIE DOO NIŠ"] <- "RADIO TELEVIZIJA BELLE AMIE"
-
+barcharttop4podnosioci$`PODNOSILAC PROJEKTA`[barcharttop4podnosioci$`PODNOSILAC PROJEKTA`=="RADIODIFUZNO PREDUZEĆE STUDIO B DOO BEOGRAD (VRAČAR)"] <- "RADIODIFUZNO PREDUZEĆE STUDIO B"
     
 barcharttop4podnosioci<- barcharttop4podnosioci %>%
     mutate(Info = paste('<br>', "Podnosilac:", 
@@ -749,8 +749,10 @@ barcharttop4podnosiociloksam <- Projectmedia %>%
     
 barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`[barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA NOVI PAZAR DOO NOVI PAZAR"] <- "RADIO TELEVIZIJA NOVI PAZAR"
 barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`[barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA BELLE AMIE DOO NIŠ"] <- "RADIO TELEVIZIJA BELLE AMIE"
+barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`[barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`=="RADIODIFUZNO PREDUZEĆE STUDIO B DOO BEOGRAD (VRAČAR)"] <- "RADIODIFUZNO PREDUZEĆE STUDIO B"
 
-barcharttop4podnosiociloksam<-barcharttop4podnosiociloksam %>%
+
+barcharttop4podnosiociloksam <- barcharttop4podnosiociloksam %>%
     
     mutate(Info = paste('<br>', "Podnosilac:", 
                         
