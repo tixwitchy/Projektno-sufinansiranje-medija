@@ -26,7 +26,7 @@ Excel file – Projektno sufinansiranje medija.xlsx sadrži sledeće kolone:
 
 1. **ORGAN KOJI RASPISUJE KONKURS/OPŠTINA** – odnosi se na instituciju koja je raspisala konkurs: Ministarstvo kulture i informisanja, Pokrajinski sekretarijat za kulturu, javno informisanje i odnose sa verskim zajednicama i 152 lokalne samouprave (gradovi i opštine). Pošto gradske opštine nisu u obavezi da raspisuju konkurse za projektno sufinansiranje, navedene su samo one gradske opštine koje su makar jednom objavile konkurs ( za Beograd to su Lazarevac, Mladenovac i Obrenovac, a za Niš – Pantelej, Crveni Krst i Medijana).
 
-2. **GODINA** – kolona koja se odnosi na godinu kada je konkurs raspisan.
+2. **GODINA** – kolona koja se odnosi na godinu kada je doneto rešenje o dodeli sredstava.
 
 3. **PODNOSILAC PROJEKTA** – Ova kolona beleži nazive podnosilaca projekata (preduzeća, agencije i drugo) kako su registrovani u Agenciji za privredne registre (APR). Podaci su proveravani na [sajtu APR-a](https://www.apr.gov.rs). Zbog neujednačenog korišćenja velikih i malih slova u registru APR-a, svi podnosioci projekata su ispisani verzalom (velikim slovima). U nekim situacijama podnosilac projekta predstavlja instituciju poput fakulteta ili religijske organizacije koja nije registrovana u APR-u. Njihov naziv je, u tom slučaju, preuziman iz rešenja samog konkursa.
 
