@@ -862,7 +862,7 @@ ui <-
                                   
                                   o istorijatu konkursnog sufinansiranja u Srbiji. Kod za kreiranje same aplikacije nalazi se na sledećem ",
                                   
-                                  a("linku.", href = "https://github.com/Centarzaodrzivezajednice/Projektno_sufinansiranje_medija_u_Srbiji")," 
+                                  a("linku.", href = "https://github.com/Centarzaodrzivezajednice/Projektno-sufinansiranje-medija")," 
                                   
                                   Podaci su takođe dostupni i na", a(" Portalu otvorenih podataka.", href = "https://data.gov.rs/sr/"), align ="justify"),
                               
