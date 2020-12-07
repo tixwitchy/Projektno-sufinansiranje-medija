@@ -890,11 +890,17 @@ ui <-
                               
                               plotlyOutput("linechartteme", height = 500) %>% withSpinner(color = "#E95420"),
                               
-                              img(src="COZ logo.jpg",style="width: 200px"),
+                              fluidRow(
+                                column(4, img(src="COZ logo.jpg",style="width: 200px;")),
+                                
+                                column(4, img(src="OEBSlog.png", style="width: 260px; margin-top: 80px;")),
+                                
+                                column(4, img(src="min.png"))
+                              )
                               
-                              img(src="OEBSlog.png",style="width: 250px"),
                               
-                              img(src="min.png")
+                              
+                              
                   )),
         
         #uredjivanje taba podnosilac projekta
