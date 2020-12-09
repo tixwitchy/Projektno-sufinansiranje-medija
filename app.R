@@ -159,8 +159,22 @@ podnosiocipojsuma <- Projectmedia %>%
         
     summarize( `BROJ MEDIJA ZA KOJE JE PODNOSILAC PODNEO PROJEKTE` = n_distinct(`NAZIV MEDIJA`,na.rm = TRUE))
 
+    podnosiocipojsuma <- Projectmedia %>%
+      
+      
+      group_by(`PODNOSILAC PROJEKTA`) %>%
+      
+      summarise(`UKUPNO DODELJENO U EVRIMA`= sum(`SREDSTVA U EVRIMA`)) 
+    
+    podnosiociorgani<- Projectmedia %>%
+      
+      group_by(`PODNOSILAC PROJEKTA`) %>% 
+      
+      summarize( `BROJ ORGANA OD KOJIH JE PODNOSILAC DOBIO SREDSTVA` = n_distinct(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`))  
+    
+    
 podnosiocitotal <- left_join(podnosiocipojsuma, podnosiocimediji, by = "PODNOSILAC PROJEKTA")
-
+podnosiocitotal <-left_join(podnosiocitotal, podnosiociorgani,by = "PODNOSILAC PROJEKTA")
 #Formatiranje kolone sa sredstvima
 
 podnosiocitotal$`UKUPNO DODELJENO U EVRIMA` <- format( 
@@ -185,7 +199,6 @@ barcharttop4podnosioci <- Projectmedia %>%
     
 barcharttop4podnosioci$`PODNOSILAC PROJEKTA`[barcharttop4podnosioci$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA NOVI PAZAR DOO NOVI PAZAR"] <- "RADIO TELEVIZIJA NOVI PAZAR"
 barcharttop4podnosioci$`PODNOSILAC PROJEKTA`[barcharttop4podnosioci$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA BELLE AMIE DOO NIŠ"] <- "RADIO TELEVIZIJA BELLE AMIE"
-barcharttop4podnosioci$`PODNOSILAC PROJEKTA`[barcharttop4podnosioci$`PODNOSILAC PROJEKTA`=="RADIODIFUZNO PREDUZEĆE STUDIO B DOO BEOGRAD (VRAČAR)"] <- "RADIODIFUZNO PREDUZEĆE STUDIO B"
     
 barcharttop4podnosioci<- barcharttop4podnosioci %>%
     mutate(Info = paste('<br>', "Podnosilac:", 
@@ -749,7 +762,7 @@ barcharttop4podnosiociloksam <- Projectmedia %>%
     
 barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`[barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA NOVI PAZAR DOO NOVI PAZAR"] <- "RADIO TELEVIZIJA NOVI PAZAR"
 barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`[barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`=="RADIO TELEVIZIJA BELLE AMIE DOO NIŠ"] <- "RADIO TELEVIZIJA BELLE AMIE"
-barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`[barcharttop4podnosiociloksam$`PODNOSILAC PROJEKTA`=="RADIODIFUZNO PREDUZEĆE STUDIO B DOO BEOGRAD (VRAČAR)"] <- "RADIODIFUZNO PREDUZEĆE STUDIO B"
+
 
 
 barcharttop4podnosiociloksam <- barcharttop4podnosiociloksam %>%
