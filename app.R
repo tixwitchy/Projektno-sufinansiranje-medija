@@ -873,9 +873,7 @@ ui <-
                                   
                                   kao i celokupnu publikaciju u kojoj se pored metodoloških napomena i preporuka, nalazi i tekst 
                                   
-                                  o istorijatu konkursnog sufinansiranja u Srbiji. Kod za kreiranje same aplikacije nalazi se na sledećem ",
-                                  
-                                  a("linku.", href = "https://github.com/Centarzaodrzivezajednice/Projektno-sufinansiranje-medija")," 
+                                  o istorijatu konkursnog sufinansiranja u Srbiji.
                                   
                                   Podaci su takođe dostupni i na", a(" Portalu otvorenih podataka.", href = "https://data.gov.rs/sr/"), align ="justify"),
                               
@@ -1066,8 +1064,7 @@ ui <-
                      
                      downloadBttn ("downloaddatabase1", "Preuzmi.XLSX", style = "gradient", size = "sm"),
                      
-                     h4("Ovde možete da skinete metodologiju sa detaljima kako su prikupljeni podaci i publikaciju. Online verziju publikacije koja se redovno ažurira
-                        možete naći",a(" ovde.", href = "https://projektnosufinansiranjehtmlizvestaj.netlify.app/"), align = "justify"),
+                     h4("Ovde možete da skinete metodologiju sa detaljima kako su prikupljeni podaci i publikaciju." , align = "justify"),
                      
                      # ubacivanje tastera za skidanje metodologije i analize
                      
@@ -1075,7 +1072,21 @@ ui <-
                      
                      downloadBttn ("downloadanalysis", "Publikacija", style = "gradient", size = "sm", color = "royal"),
                      
-                     h4("Sva rešenja koja su dobijena od lokalnih samouprava možete da pogledate na sledećem ", a("linku.", href = "https://docs.google.com/spreadsheets/d/1ajgnqWStLHUQ8XUA1LU0n5_1KdqcAIef1A4e4391ORI/edit#gid=0"), align = "justify"), 
+                     h4(strong("Online verziju publikacije"), " koja se redovno ažurira
+                     
+                        možete naći",a(" ovde.", href = "https://projektnosufinansiranjehtmlpublikacija.netlify.app/"), " Sva rešenja koja su dobijena od lokalnih samouprava
+                        
+                        možete da pogledate na sledećem ", a("linku.", href = "https://docs.google.com/spreadsheets/d/1ajgnqWStLHUQ8XUA1LU0n5_1KdqcAIef1A4e4391ORI/edit#gid=0")), 
+                        
+                       h4( " Kod za kreiranje same aplikacije nalazi se na sledećoj ",
+                                  
+                                  a("veb stranici.", href = "https://github.com/Centarzaodrzivezajednice/Projektno-sufinansiranje-medija"), "Sam kod i podaci mogu da se preuzmu 
+                           
+                           pod licencom", a("Creative Commons Zero v1.0 Universal.", href="https://creativecommons.org/publicdomain/zero/1.0/"), 
+                        
+                        " Iako je ovo najotvorenija moguća licenca, zaista bismo voleli da, ako budete koristili podatke ili kod za veb aplikaciju da nas o tome obavestite
+                        
+                        kako bi mogli da pratimo njenu dalju upotrebu i razvoj i za to vam se unapred zahvaljujemo. ", align = "justify"), 
                      
                      h4("Zbog kompleksnosti istraživanja i prikupljanja velike količine podataka, ukoliko imate neke ispravke
                                   
