@@ -1076,13 +1076,13 @@ ui <-
                      
                         možete naći",a(" ovde.", href = "https://projektnosufinansiranjehtmlpublikacija.netlify.app/"), " Sva rešenja koja su dobijena od lokalnih samouprava
                         
-                        možete da pogledate na sledećem ", a("linku.", href = "https://docs.google.com/spreadsheets/d/1ajgnqWStLHUQ8XUA1LU0n5_1KdqcAIef1A4e4391ORI/edit#gid=0")), 
+                        možete da pogledate na sledećem ", a("linku.", href = "https://docs.google.com/spreadsheets/d/1ajgnqWStLHUQ8XUA1LU0n5_1KdqcAIef1A4e4391ORI/edit#gid=0"), align = "justify"), 
                         
                        h4( " Kod za kreiranje same aplikacije nalazi se na sledećoj ",
                                   
                                   a("veb stranici.", href = "https://github.com/Centarzaodrzivezajednice/Projektno-sufinansiranje-medija"), "Sam kod i podaci mogu da se preuzmu 
                            
-                           pod licencom", a("Creative Commons Zero v1.0 Universal.", href="https://creativecommons.org/publicdomain/zero/1.0/"), 
+                           pod licencom", a("Creative Commons Zero v1.0 Universal.", href="https://creativecommons.org/publicdomain/zero/1.0/", align = "justify"), 
                         
                         " Iako je ovo najotvorenija moguća licenca, zaista bismo voleli da, ako budete koristili podatke ili kod za veb aplikaciju da nas o tome obavestite
                         
