@@ -153,11 +153,16 @@ podnosiocipojsuma <- Projectmedia %>%
     
     summarise(`UKUPNO DODELJENO U EVRIMA`= sum(`SREDSTVA U EVRIMA`)) 
 
-    podnosiocimediji<- Projectmedia %>%
+
+    podnosiocimediji <- Projectmedia
+    
+    podnosiocimediji$`NAZIV MEDIJA`[ podnosiocimediji$`NAZIV MEDIJA`== "Produkcija"] <- NA
+
+    podnosiocimediji<- podnosiocimediji %>%
     
     group_by(`PODNOSILAC PROJEKTA`) %>% 
         
-    summarize( `BROJ MEDIJA ZA KOJE JE PODNOSILAC PODNEO PROJEKTE` = n_distinct(`NAZIV MEDIJA`,na.rm = TRUE))
+    summarize( `BROJ IDENTIFIKOVANIH MEDIJA ZA KOJE JE PODNOSILAC APLICIRAO` = n_distinct(`NAZIV MEDIJA`,na.rm = TRUE))
 
     podnosiocipojsuma <- Projectmedia %>%
       
@@ -590,6 +595,7 @@ barcharttop4podnosiocipoksek <- Projectmedia %>%
 barcharttop4podnosiocipoksek$`PODNOSILAC PROJEKTA`[barcharttop4podnosiocipoksek$`PODNOSILAC PROJEKTA`=="DNEVNIK VOJVODINA PRESS DOO PREDUZEĆE ZA IZDAVANJE I ŠTAMPANJE NOVINA, NOVI SAD"] <- "DNEVNIK VOJVODINA PRESS"
 
 barcharttop4podnosiocipoksek$`PODNOSILAC PROJEKTA`[barcharttop4podnosiocipoksek$`PODNOSILAC PROJEKTA`=="SAVEZ GLUVIH I NAGLUVIH VOJVODINE AUDIOLOŠKI CENTAR"] <- "SAVEZ GLUVIH I NAGLUVIH VOJVODINE"
+
 
 # dodavanje kolone sa informacijama za pop-up
 
