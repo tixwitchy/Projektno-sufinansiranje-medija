@@ -2010,11 +2010,23 @@ server <- function(input, output, session){
         content = function(file) {
             
             file.copy("www/metodologijafinal.pdf", file)
+          
+          
         }
     )
     
     
-    
+    output$downloadanalysis <- downloadHandler (
+      
+      filename = "Publikacija.pdf",
+      
+      content = function(file) {
+        
+        file.copy("www/publikacija.pdf", file)
+        
+        
+      }
+    )   
     
     
     
