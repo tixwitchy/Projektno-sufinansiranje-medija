@@ -1383,7 +1383,7 @@ server <- function(input, output, session){
                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
             )
         
-        pcpoj
+        pcpoj%>%layout(margin = list(b = 40))
         
         
         
@@ -1413,7 +1413,7 @@ server <- function(input, output, session){
                    
                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
         
-        pcpsvi }
+        pcpsvi%>%layout(margin = list(b = 40)) }
         
     })
     
@@ -1528,7 +1528,7 @@ server <- function(input, output, session){
                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
             )
         
-        pctkul
+        pctkul%>%layout(margin = list(b = 40))
         
     }})
     
@@ -1686,7 +1686,7 @@ server <- function(input, output, session){
                    
                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
         
-        pctpoksek
+        pctpoksek%>%layout(margin = list(b = 40))
         
         
        
@@ -1840,7 +1840,7 @@ server <- function(input, output, session){
                        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
                 )
             
-            pcloksam
+            pcloksam%>%layout(margin = list(b = 40))
             
             
         }}else{ 
@@ -1869,7 +1869,7 @@ server <- function(input, output, session){
                        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
                 )
             
-            pctsvesam
+            pctsvesam%>%layout(margin = list(b = 40))
             
         }})
     
