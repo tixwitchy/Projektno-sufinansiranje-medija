@@ -881,7 +881,7 @@ ui <-
                                   
                                   o istorijatu konkursnog sufinansiranja u Srbiji.
                                   
-                                  Podaci su takođe dostupni i na", a(" Portalu otvorenih podataka.", href = "https://data.gov.rs/sr/"), align ="justify"),
+                                  Podaci su takođe dostupni i na", a(" Portalu otvorenih podataka.", href = "https://data.gov.rs/sr/datasets/rezultati-konkursa-za-projektno-sufinansiranja-medijskikh-sadrzhaja/"), align ="justify"),
                               
                               h4 (paste("Na ovoj stranici imate sumirane podatke za sve godine trajanja projektnog sufinansiranja, a zastupljeni 
                                         
