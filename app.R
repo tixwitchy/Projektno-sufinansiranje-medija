@@ -122,6 +122,7 @@ linechartteme <- linechartteme %>%
                        
                        "Godina:",GODINA,"<br>"))
 
+
 #Formatiranje kolone sa godinama
 
 linechartteme$GODINA <- as.factor(linechartteme$GODINA)
@@ -1118,7 +1119,7 @@ server <- function(input, output, session){
        
          #pravljenje grafikona
         
-        g1<- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,-`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`,label = `Info`))+
+       g1<- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,-`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`,label = `Info`))+
             
             geom_bar (stat = "identity",fill = c("#9F2A63FF","#F57D15FF","#FAC127FF"))+
             
@@ -1163,9 +1164,10 @@ server <- function(input, output, session){
         
         gg <- ggplot (linechartteme, aes(GODINA, `n`, group = `TEMA PROJEKTA`, label = Info, color =`TEMA PROJEKTA`)) +
             
-            geom_line(position = position_dodge(0.1))+
+          geom_line(position = position_dodge(0.1))+
             
             geom_point(position = position_dodge(0.1))+
+          
             
             ggtitle("Zastupljenost tema po godinama\n na osnovu broja projekata")+
             
