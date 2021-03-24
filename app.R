@@ -854,7 +854,7 @@ ui <-
                                 
                                 tableOutput("tabelaukupno"),
                                 
-                                plotlyOutput("barchartdonor") %>% withSpinner(color="#E95420"),
+                                plotlyOutput("barchartdonor") %>% withSpinner(color="#E95420")
                   ),
                   
                   #tekst koji ide u glavni ili desni deo sa nekim informacijama koje izvlaci iz same tabele, dodati su i linkovi
