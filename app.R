@@ -11,6 +11,8 @@ library(lubridate)
 library(writexl)
 library(shinycssloaders)
 
+options(scipen = 999)
+
 
 
 
