@@ -1,0 +1,1263 @@
+---
+title: "Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja- Nacrt"
+author: "Nedim Sejdinović i Duško Medić"
+date: '`r format(Sys.Date(),"%d. %m. %Y.")`'
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    toc: true
+
+---
+
+
+
+```{r setup, include=FALSE}
+#Ukoliko nemate prethodno instalirane pakete obrisite tarabu u narednim redovima i instalirajte ih
+
+#install.packages("tidyverse")
+#install.packages("readxl")
+#install.packages("plotly")
+#install.packages("scales")
+#install.packages("viridis")
+#install.packages("lubridate")
+#install.packages("writexl")
+#install.packages("stringi")
+#install.packages("crosstalk")
+
+#Instaliranje paketa se radi samo prvi put kada se koriste, a da bi im se pristupilo koristi se funkcija library
+
+library(tidyverse)
+library(readxl)
+library(plotly)
+library(scales)
+library(viridis)
+library(crosstalk)
+library(lubridate)
+library(writexl)
+library(stringi)
+
+
+
+options(scipen = 999)
+
+# ucitavanje excel tabele
+ 
+Projectmedia <- read_excel("Projektno sufinansiranje medija.xlsx")
+
+#Insajder media tim i Info IT Media
+
+Informer<-Projectmedia%>%
+  filter(`PODNOSILAC PROJEKTA`=="INSAJDER TIM DOO BEOGRAD-STARI GRAD" |`PODNOSILAC PROJEKTA`=="INFO IT MEDIA DOO BEOGRAD-STARI GRAD")
+
+informerdin<- format(sum(Informer$`SREDSTVA U DINARIMA`), big.mark = ",")
+informereur<-format(sum(Informer$`SREDSTVA U EVRIMA`), big.mark = ",")
+#Informer, Srpski telegraf i alo
+
+tabloidi<-Projectmedia%>%
+  filter(`PODNOSILAC PROJEKTA`=="INSAJDER TIM DOO BEOGRAD-STARI GRAD" |`PODNOSILAC PROJEKTA`=="INFO IT MEDIA DOO BEOGRAD-STARI GRAD" |
+     `PODNOSILAC PROJEKTA`=="ALO MEDIA SYSTEM DOO BEOGRAD" |  `PODNOSILAC PROJEKTA`=="MEDIJSKA MREŽA DOO BEOGRAD")
+
+tabloididin<- format(sum(tabloidi$`SREDSTVA U DINARIMA`), big.mark = ",")
+tabloidieur<-format(sum(tabloidi$`SREDSTVA U EVRIMA`), big.mark = ",")
+
+
+
+#Ukupan broj podnosilaca
+
+#Isklucivanje konkursa gde sredstva nisu dodeljena
+
+Projectmedia1 <- Projectmedia %>%
+  
+  filter(`SREDSTVA U EVRIMA` != 0)
+
+brojpodnosilaca <- n_distinct (Projectmedia1$`PODNOSILAC PROJEKTA`)
+
+brojprojekata <- Projectmedia %>%
+  
+  filter(`SREDSTVA U DINARIMA` != 0)
+
+#Broj projekata na konkursima
+
+#Skracivanje naziva za Pokrajinski sekretarijat i spajanje svih upstina pod naziv Lokalne samouprave
+
+brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` == "Pokrajinski sekretarijat za kulturu i javno informisanje"] <-"Pokrajinski sekretarijat"
+
+brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & brojprojekata$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat"] <- "Lokalne samouprave"
+
+# Broj projekata prema organu koji je raspisao konkurs za grafikon
+
+brojprojekataorgan <- brojprojekata %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
+  
+  summarise(`BROJ PROJEKATA` = n()) %>%
+  
+  mutate(Info = paste('<br>', "Organ koji raspisuje konkurs:", 
+                      
+                      `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
+                      
+                      "Ukupan broj projekata:",format(`BROJ PROJEKATA`,big.mark = ","), '<br>'))
+
+# Broj projekata prema organu formatiran za tekstualni deo izvestaja
+
+brojprojekataorgan1 <- brojprojekataorgan
+
+brojprojekataorgan1$`BROJ PROJEKATA` <-  format(brojprojekataorgan1$`BROJ PROJEKATA`,big.mark = ",")
+
+# Broj projekata prema organu koji je raspisao konkurs i godini za grafikon
+
+brojprojekataorgangod <- brojprojekata %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, GODINA) %>%
+  
+  summarise(`BROJ PROJEKATA` = n()) %>%
+  
+  mutate(Info = paste("<br>",
+                      
+                       "Organ koji raspisuje konkurs:", `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, "<br>",
+                       "Godina:", GODINA, "<br>",
+                      
+                       "Broj projekata:", format(`BROJ PROJEKATA`,big.mark = ","), "<br>"
+                        ))
+
+#Broj projekata prema organu koji je raspisao konkurs i godini  formatiran za tekstualni deo
+
+brojprojekataorgangod1 <- brojprojekataorgangod
+
+brojprojekataorgangod1$`BROJ PROJEKATA` <-  format(brojprojekataorgangod1$`BROJ PROJEKATA`, big.mark = ",")
+
+brojprojekataorgangod1min<- brojprojekataorgangod1%>%
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Ministarstvo kulture")
+
+brojprojekataorgangod1pok<- brojprojekataorgangod1%>%
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski sekretarijat")
+
+brojprojekataorgangod1lok<- brojprojekataorgangod1%>%
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Lokalne samouprave")
+#Ukupan broj projekata po godinama za grafikon
+
+brojprojekatagodina <- brojprojekata %>%
+  
+  group_by(`GODINA`) %>%
+  
+  summarise(`BROJ PROJEKATA` = n()) %>%
+  
+  mutate(Info = paste("<br>",
+                      
+                       "Godina:", GODINA, "<br>",
+                      
+                       "Broj projekata:", format(`BROJ PROJEKATA`, big.mark = ","), "<br>"
+                        ))
+
+#Ukupan broj projekata po godinama, formatiran za tekstualni deo izvestaja
+
+brojprojekatagodina1 <- brojprojekatagodina
+
+brojprojekatagodina1$`BROJ PROJEKATA` <- format(brojprojekatagodina1$`BROJ PROJEKATA`, big.mark = ",")
+
+#Ukupan broj opstina za tekstualni deo izvestaja
+
+brojopstina <- n_distinct(Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & Projectmedia$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje"])
+
+#Podskup za izvlacenje imena opstina koje nisu raspisale konkurse za tekstualni deo izvestaja
+
+opstinebezkonkursa <- Projectmedia %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
+  
+  summarize(`SREDSTVA U DINARIMA`=sum(`SREDSTVA U DINARIMA`)) %>%
+  
+  filter(`SREDSTVA U DINARIMA` == 0)
+
+
+#Podskup za kolicinu novca koja je ukupno data po godinama za grafikon
+
+novacgod <- brojprojekata %>%
+  
+  group_by(GODINA) %>%
+  
+  summarise(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  mutate(Info = paste("<br>",
+                       
+                       "Godina:", GODINA, "<br>",
+                      
+                       "Ukupno dodeljenih sredstava:", format(`SREDSTVA U EVRIMA`, big.mark = ","), "eur<br>"
+                        ))
+  
+# Podskup ukupno dodeljenog novca prema organu koji je raspisao za grafikon
+
+#Iskljucivanje konkursa na kojima sredstva nisu dodeljena
+
+barchartorgani <- Projectmedia %>%
+  
+    filter(`SREDSTVA U DINARIMA` != 0)
+
+#Spajanje svih opstina pod naziv Lokalne samouprave
+
+barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Lokalne samouprave"
+
+#Grupisanje prema organu koji dodeljuje sredstva
+
+barchartorgani <- barchartorgani %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
+  
+    summarise(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`),n = n())%>%
+  
+    arrange(desc(`SREDSTVA U EVRIMA`))
+
+#Skracivanje naziva Pokrajinskog sekretarijata
+
+barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[barchartorgani$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski sekretarijat"
+
+#dodavanje Info kolone  za pop-up informacije kada se predje kursorom
+
+barchartorgani <- barchartorgani %>%
+  
+    mutate(Info=paste('<br>', "Organ koji raspisuje konkurs:", 
+                      
+                      `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
+                      
+                      "Ukupno novca:",format(`SREDSTVA U EVRIMA`,big.mark = ","), 'eur<br>',
+                      
+                      "Broj projekata:",format(n,big.mark = ","), '<br>'))
+
+
+#Dodela novca prema organu po godinama  koji je raspisao konkurs za grafikon
+
+novacgodorgan <- Projectmedia
+
+# #Skracivanje naziva za Pokrajinski sekretarijat i spajanje svih upstina pod naziv Lokalne samouprave
+
+novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` [novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture" & novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`!="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Lokalne samouprave"
+
+novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`[novacgodorgan$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski sekretarijat za kulturu i javno informisanje"] <- "Pokrajinski sekretarijat"
+
+#Podskup za dodeljen novac po organu po godinama za grafikon
+
+novacgodorgan <- novacgodorgan %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, GODINA) %>%
+  
+  summarise(`SREDSTVA U EVRIMA`=sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  mutate(Info= paste("<br>",
+                        "Organ koji raspisuje konkurs:", 
+                      
+                      `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
+                     
+                       "Godina:", GODINA, "<br>",
+                     
+                       "Ukupno dodeljenih sredstava:", format(`SREDSTVA U EVRIMA`, big.mark = ","), "eur<br>"
+                        ))
+
+#Ukupno dodeljen novac prema organu po godinama, formatiran za tekstualni deo izvestaja
+
+novacgodorgan1 <- novacgodorgan
+
+novacgodorgan1$`SREDSTVA U EVRIMA` <- format(novacgodorgan1$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+novacgodorgan1min<- novacgodorgan1%>%
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Ministarstvo kulture")
+
+novacgodorgan1pok<- novacgodorgan1%>%
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Pokrajinski sekretarijat")
+
+novacgodorgan1lok<- novacgodorgan1%>%
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`=="Lokalne samouprave")
+
+#top 5 opstina koje su izdvojile najvise novca za tekstualni deo izvestaja
+
+Opstinesuma<- Projectmedia %>%
+  
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture") %>%
+  
+   filter(`SREDSTVA U DINARIMA`!=0)%>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
+  
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  arrange(desc(`SREDSTVA U EVRIMA`)) %>%
+  
+  top_n(5) 
+
+#formatiranje kolone sa sredstvima
+
+Opstinesuma1<-Opstinesuma
+
+Opstinesuma1$`SREDSTVA U EVRIMA`<- format(Opstinesuma1$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+#Pravljenje podskupa za ukupno dodeljeni novca per capita za opstine top 5 najvise i 5 koje su dodelile najmanje
+
+Opstinesumasvi<- Projectmedia %>%
+  
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno
+         
+         informisanje" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture") %>%
+  
+   filter(`SREDSTVA U DINARIMA` != 0) %>%
+  
+  group_by(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`) %>%
+  
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`))
+
+#Pretvaranje naziva opstina u velika slova da bi se spojilo sa excel tabelom (population) -broj stanovnika
+
+Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` <- toupper(Opstinesumasvi$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
+
+# Ucitavanje tabele sa brojem stanovnika po opstini i spajanje dve tabele
+
+population <- read_excel("population.xlsx")
+
+popopstine <- left_join(Opstinesumasvi,population)
+
+
+popopstine$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` <- stri_trans_totitle(popopstine$`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)
+
+# Kreiranje nove kolone  sa sredstvima u evrima per capita za opstine
+popopstine <- popopstine %>%
+  
+  mutate(`Po broju stanovnika`= round(`SREDSTVA U EVRIMA`/POPULACIJA,2)) %>%
+  
+  arrange(desc(`Po broju stanovnika`))
+
+# Iskljucivanje opstina koje pripadaju opstini Nis-Razlog objasnjen u analizi u izvestaju
+
+popopstine1 <- popopstine%>%
+  
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Crveni Krst Niš", `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pantelej" & `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Medijana" )
+
+
+# Kreiranje podskupa sa top 5 opstina koje su dale najvise novca u evrima po glavi stanovnika (per capita)
+
+popopstinetop <- popopstine1 %>%
+  
+  arrange(desc(`Po broju stanovnika`)) %>%
+  
+ top_n(5, `Po broju stanovnika`) %>%
+  
+  mutate(Info = paste('<br>',
+                      
+                      `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
+                      
+                      "Dodeljeno novca po glavi stanovnika:", `Po broju stanovnika`, 'eur<br>',
+                      
+                      "Ukupno novca:", format(`SREDSTVA U EVRIMA`, big.mark = ","), 'eur<br>'))
+
+# Kreiranje podskupa sa  5 opstina koje su dale najmanje novca u evrima po glavi stanovnika (per capita)
+
+popopstinelow <- popopstine1 %>%
+  
+  arrange(`Po broju stanovnika`) %>%
+  
+ top_n(-5, `Po broju stanovnika`) %>%
+  
+  mutate(Info = paste('<br>',
+                      
+                      `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, '<br>',
+                      
+                      "Dodeljeno novca po glavi stanovnika:", `Po broju stanovnika`, 'eur<br>',
+                      
+                      "Ukupno novca:", format(`SREDSTVA U EVRIMA`,big.mark = ","), 'eur<br>'))
+
+
+#Kreiranje podskupa za 5 podnosilaca koji su dobili najvise novca od svih organa
+
+barchartpodnosiocizasve <- Projectmedia %>%
+  
+  group_by(`PODNOSILAC PROJEKTA`) %>%
+  
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`), n = n()) %>%
+  
+  arrange(desc(`SREDSTVA U EVRIMA`)) %>%
+  
+  top_n(5, `SREDSTVA U EVRIMA`) %>%
+
+  mutate(Info = paste('<br>', "Podnosilac:", 
+                      
+                      `PODNOSILAC PROJEKTA`, '<br>',
+                      
+                      "Ukupno dobijena sredstava:", format (`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE), 'eur<br>',
+                      
+                      "Broj projekata:", n, '<br>'))
+                      
+
+#top 5 podnosilaca koji su dobili najvise sredstava od svih organa, formatirano, za tekstualni deo izvestaja
+
+barchartpodnosiocizasve1<-barchartpodnosiocizasve
+
+
+barchartpodnosiocizasve1$`SREDSTVA U EVRIMA` <- format(barchartpodnosiocizasve1$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+# Podnosioci koji su dobili najvise novca od ministarstva kulture za tekstualni deo izvestaja
+
+podnosiocikult <- Projectmedia %>%
+  
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` == "Ministarstvo kulture") %>%
+  
+  group_by(`PODNOSILAC PROJEKTA`) %>%
+  
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  arrange(desc(`SREDSTVA U EVRIMA`)) 
+
+podnosiocikult$`SREDSTVA U EVRIMA` <- format(podnosiocikult$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+
+# Podnosioci koji su dobili najvise novca od pokrajinskog sekretarijata za tekstualni deo izvestaja
+
+podnosiocipoksek <- Projectmedia %>%
+  
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` == "Pokrajinski sekretarijat za kulturu i javno informisanje") %>%
+  
+  group_by(`PODNOSILAC PROJEKTA`) %>%
+  
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  arrange(desc(`SREDSTVA U EVRIMA`)) 
+
+podnosiocipoksek$`SREDSTVA U EVRIMA` <- format(podnosiocipoksek$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+# Podnosioci koji su dobili najvise novca od svih lokalnih samouprava za tekstualni deo izvestaja
+
+podnosiociloksam <- Projectmedia %>%
+  
+  filter(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Pokrajinski sekretarijat za kulturu i javno informisanje"& `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA` != "Ministarstvo kulture") %>%
+  
+  group_by(`PODNOSILAC PROJEKTA`) %>%
+  
+  summarize(`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  arrange(desc(`SREDSTVA U EVRIMA`))
+
+podnosiociloksam$`SREDSTVA U EVRIMA` <- format(podnosiociloksam$`SREDSTVA U EVRIMA`, big.mark = ",")
+
+
+# Ukupna astupljenost tema za grafikon 
+
+Zastupljenosttema <- Projectmedia
+
+Zastupljenosttema  <- Zastupljenosttema %>%
+  
+  filter(!`SREDSTVA U EVRIMA` == 0)
+
+# Promena NA vrednosti sa Nema informacija
+
+Zastupljenosttema $`TEMA PROJEKTA`[is.na(Zastupljenosttema $`TEMA PROJEKTA`)] <- "Nema informacija"
+
+Zastupljenosttema  <- Zastupljenosttema  %>%
+  
+  
+  group_by(`TEMA PROJEKTA`) %>%
+  
+  summarize( n = n(), `SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+  arrange(desc(`SREDSTVA U EVRIMA`)) %>%
+  
+  mutate(PROCENAT=round( `SREDSTVA U EVRIMA`/sum(`SREDSTVA U EVRIMA`)*100, 2)) %>%
+  
+  mutate(Info = paste('<br>', "Tema:", 
+                      
+                      `TEMA PROJEKTA`, '<br>',
+                      
+                      "Ukupno sredstava po temi:", format (`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE), 'eur<br>',
+                      
+                      "Učešće u dodeljenim sredstvima:", PROCENAT, "%<br>",
+                      
+                      "Ukupan broj projekata:", n, "<br>"
+                      
+  )) %>%
+  
+  mutate( boje = case_when (`TEMA PROJEKTA` == "Ekologija i zdravlje" ~ "#440154FF",
+                            
+                            `TEMA PROJEKTA` == "Ekonomija" ~ "#472D7BFF",
+                            
+                            `TEMA PROJEKTA` == "Informativni program" ~ "#3B528BFF",
+                            
+                            `TEMA PROJEKTA` == "Kultura i obrazovanje" ~ "#2C728EFF",
+                            
+                            `TEMA PROJEKTA` == "Manjinski sadržaj" ~ "#21908CFF",
+                            
+                            `TEMA PROJEKTA` == "Nema informacija" ~ "#27AD81FF",
+                            
+                            `TEMA PROJEKTA` == "Neprivilegovane grupe" ~ "#5DC863FF",
+                            
+                            `TEMA PROJEKTA` == "Ostalo" ~ "#AADC32FF",
+                            
+                            `TEMA PROJEKTA` == "Sport" ~ "#FDE725FF"))
+
+# Zastupljenost tema za tekstualni deo izvestaja
+
+zatekstteme <- Zastupljenosttema 
+
+zatekstteme$`TEMA PROJEKTA` <- tolower(zatekstteme$`TEMA PROJEKTA`)
+
+zatekstteme$`SREDSTVA U EVRIMA` <- format (zatekstteme$`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
+
+zatekstteme$`TEMA PROJEKTA`[zatekstteme$`TEMA PROJEKTA` == "nema informacija"] <- NA
+
+zatekstteme <- zatekstteme %>%
+  
+  na.omit()
+
+zatekstteme1 <- Zastupljenosttema
+
+zatekstteme1$`SREDSTVA U EVRIMA` <- format (zatekstteme1$`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
+
+
+#Koliko je sredstava dodeljeno za projekte gde nije tema navedena u resenjima i procenat
+
+bezinfonovci  <-zatekstteme1 $`SREDSTVA U EVRIMA`[zatekstteme1 $`TEMA PROJEKTA` == "Nema informacija"]
+
+bezinfoprocenti <- zatekstteme1 $`PROCENAT`[zatekstteme1 $`TEMA PROJEKTA` == "Nema informacija"]
+
+#Dodeljeno sredstava po temama po godinama za grafikon 
+
+linechartteme <- Projectmedia
+
+#Iskljucivanje slucajeva kada sredstva nisu dodeljena
+
+linechartteme <- linechartteme%>%
+  filter(!`SREDSTVA U EVRIMA` == 0)
+
+# Promena NA vrednosti sa Nema informacija
+linechartteme$`TEMA PROJEKTA`[is.na(linechartteme$`TEMA PROJEKTA`)] <- "Nema informacija"
+
+#Formatiranje kolone teme u faktor zbor prikazivanja na linechart-u
+
+linechartteme$`TEMA PROJEKTA` <- as.factor(linechartteme$`TEMA PROJEKTA`)
+    
+#Grupisanje prema temi i godini, sumiranje prema broju projekata po temi i novcu i 
+#kreiranje Info kolone  za pop-up informacije kada se predje kursorom
+
+linechartteme <- linechartteme %>%
+  
+    group_by(GODINA,`TEMA PROJEKTA`) %>%
+  
+    summarize(n=n(),`SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`)) %>%
+  
+    mutate(Info= paste("<br>", "Tema:", `TEMA PROJEKTA`, "<br>",
+                       
+                          "Ukupno dodeljeno sredstava po temi:", format(`SREDSTVA U EVRIMA`,big.mark = ","), "eur<br>",
+                       
+                       "Broj projekata po temi:", n, "<br>",
+                       
+                        "Godina:", GODINA, "<br>"))
+
+
+
+linechartteme$`TEMA PROJEKTA` <- as.factor(linechartteme$`TEMA PROJEKTA`)
+
+#Dodeljeno sredstava po temama po godinama za tekstualni deo izvestaja
+
+linechartteme1 <- linechartteme
+
+linechartteme1$`SREDSTVA U EVRIMA` <- format (linechartteme1$`SREDSTVA U EVRIMA`, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
+
+
+##Ukupno dodeljeno 2015 za informativni program za tekstualni deo izvestaja
+
+info2015sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Informativni program" & linechartteme1 $`GODINA` == 2015 ]
+
+##Ukupno dodeljeno 2020 za informativni program za tekstualni deo izvestaja
+
+info2020sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Informativni program" & linechartteme1 $`GODINA` == 2020 ]
+
+##Ukupno dodeljeno 2021 za informativni program za tekstualni deo izvestaja
+info2021sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Informativni program" & linechartteme1 $`GODINA` == 2021 ]
+
+##Ukupno dodeljeno 2021 za sve ostale programe bez informative za tekstualni deo izvestaja
+
+sumabezinfo2021 <- sum(linechartteme$`SREDSTVA U EVRIMA`[linechartteme $`GODINA` == 2021]) - linechartteme $`SREDSTVA U EVRIMA`[linechartteme $`TEMA PROJEKTA` == "Informativni program" & linechartteme1 $`GODINA` == 2021 ]
+
+sumabezinfo2021 <- format (sumabezinfo2021, big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE)
+
+
+##Ukupno dodeljeno 2015 za kulturu i obrazovanje za tekstualni deo izvestaja
+
+kult2015sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Kultura i obrazovanje" & linechartteme1 $`GODINA` == 2015 ]
+
+##Ukupno dodeljeno 2020 za kulturu i obrazovanje za tekstualni deo izvestaja
+
+kult2020sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Kultura i obrazovanje" & linechartteme1 $`GODINA` == 2020 ]
+##Ukupno dodeljeno 2021 za kulturu i obrazovanje za tekstualni deo izvestaja
+
+kult2021sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Kultura i obrazovanje" & linechartteme1 $`GODINA` == 2021]
+
+
+#Ukupno dodeljeno 2018 za manjinski sadrzaj za tekstualni deo izvestaja
+
+manjine2018sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Manjinski sadržaj" & linechartteme1 $`GODINA` == 2018]
+
+##Ukupno dodeljeno 2019 za manjinski sadrzaj za tekstualni deo izvestaja
+
+manjine2019sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Manjinski sadržaj" & linechartteme1 $`GODINA` == 2019]
+
+##Ukupno dodeljeno 2020 za manjinski sadrzaj za tekstualni deo izvestaja
+
+manjine2020sredstva <- linechartteme1 $`SREDSTVA U EVRIMA`[linechartteme1 $`TEMA PROJEKTA` == "Manjinski sadržaj" & linechartteme1 $`GODINA` == 2020 ]
+
+##ukupno dodeljeno sredstava po godinama za tekst
+yearstable <- Projectmedia %>%
+    
+    group_by(GODINA) %>%
+    
+    summarise(`UKUPNA SREDSTVA U EVRIMA` = sum(`SREDSTVA U EVRIMA`))
+
+
+```
+## Uvodne reči {align=justify}
+
+Pred vama je publikacija koja je izrađena u okviru projekta „Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja“, koju je, tokom 2020. i 2021, realizovao [novosadski Centar za održive zajednice](https://odrzivezajednice.org) u saradnji sa [Misijom OEBS-a u Srbiji](https://www.osce.org/mission-to-serbia/media-freedom-and-development) i [Ministarstvom kulture i informisanja Republike Srbije](https://www.kultura.gov.rs). Ovo nije prvi put da se naša organizacija bavi analizom medijskih konkursa: podsećamo da smo učestvovali u izradi [Bele knjige konkursnog sufinansiranja](http://www.ndnv.org/wp-content/uploads/2016/06/BelaKnjigaWEB.pdf), 2016. godine, u saradnji sa vodećim novinarskim i medijskim udruženjima. Krajem 2020. godine Centar za održive zajednice objavio je i publikaciju [“Otvorenim podacima do kvalitetnijeg sufinansiranja medijskih sadržaja”](https://www.osce.org/mission-to-serbia/476872), u kojoj se sumiraju i analiziraju podaci iz procesa konkursnog sufinansiranja medijskih sadržaja na svim nivoima vlasti, a u periodu od početka 2015. do kraja septembra 2020. godine.
+
+Realizovani projekti pod zajedničkim imenom „Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja“ su podrazumevali temeljit rad na prikupljanju dostupnih podataka o procesu konkursnog sufinansiranja javnog interesa u sferi javnog informisanja u periodu od početka 2015. do kraja 2021. godine. Prikupljani su podaci iz konkursa Ministarstva kulture i informisanja, vojvođanskog Sekretarijata za kulturu, javno informisanje i odnose sa verskim zajednicama, kao i konkursa raspisanih na nivou lokalnih samouprava, odnosno gradova i opština. Činjenica da smo sakupili i analizirali podatke o čak `r format(nrow(brojprojekata),big.mark=',', digits = 0, nsmall=0, scientific = FALSE)` odobrenih medijskih projekata (`r format( brojpodnosilaca, big.mark=',', digits = 0, nsmall=0, scientific = FALSE)` podnosilaca) najbolje svedoči o obimu posla. Postojeće baze podataka o odobrenim projektima, kao što je [UNS-ova baza](https://www.finansiranjemedija.rs/) ili baza [“Ke$formisanje”](https://www.raskrikavanje.rs/kesformisanje/), korišćene su za nedostajuće informacije ukoliko lokalna samouprava nije dostavila rešenja konkursa tokom trajanja projekta. Dobra vest je da je ogroman procenat lokalnih samouprava odgovorio u kratkom vremenu na zahteve upućene po Zakonu o dostupnosti informacija od javnog značajai to tokom 2021, ažurnije nego 2020. godine. Sa druge strane, rešenja o dodeli sredstava viših organa vlasti (republike i pokrajine) dostupni su na njihovim sajtovima. Kolegama iz UNS-a, drugih novinarskih i medijskih organizacija, kao i “Kriku” ovom prilikom se najsrdačnije zahvaljujemo. Zahvaljujemo se i lokalnim samoupravama koje su nam dostavile tražene podatke, u nadi da će naš projekat doprineti da se usavrši metodologija njihovog daljeg prikupljanja i postavljanja na Portal otvorenih podataka^[[Nacionalni Portal otvorenih podataka](https://data.gov.rs/sr/) predstavlja mesto na kome se objavljuju skupovi otvorenih podataka u posedu državnih organa Republike Srbije (što obuhvata organe državne uprave, autonomnih pokrajina i lokalne samouprave, kao i organizacije kojima je povereno vršenje javnih ovlašćenja – npr. Vlada, ministarstva, opštine, agencije, regulatorna tela, ustanove i komunalna preduzeća i drugi). Portal otvorenih podataka zamišljen je ne samo kao repozitorijum otvorenih podataka državnih organa, već i kao mesto interakcije sa zajednicom koja te podatke koristi.].
+
+Projektima, dakle, nije bio samo cilj prikupljanje i analiza podataka već, uopšte, promovisanje otvorenih baza podataka u sferi javnih usluga. Od otvorenih i mašinski čitljivih podataka umnogome zavisi transparentnost vlasti i unapređenje standarda rada javnih službi. Razvoj otvorenih baza podataka omogućava i olakšava kontrolu rezultata rada institucija, što je preduslov za razvoj demokratskog i modernog društva. U tom smislu, u okviru realizacije ovog projekta razvili smo veb aplikaciju, koja je pred vama i koja će vam omogućiti da na različite načine pretražujete i analizirate prikupljene podatke, ali i da ih preuzmete u funkcionalnom formatu koji vam omogućava dalji rad sa njima. Dakle, cilj je da istraživačima, medijskim poslenicima, predstavnicima vlasti, ali i građanima, omogućimo pristup podacima koji mogu da budu podloga za neka buduća istraživanja medijskog tržišta i odnosa između vlasti i medija. Osim toga, na [našem sajtu](https://centarzaodrzivezajednice.shinyapps.io/Projektno_sufinansiranje_medija_u_Srbiji/) možete preuzeti i druge proizvode našeg projekta. Na njemu možete da pronađete i link ka kodu za kreiranje same aplikacije, što još više doprinosi otvorenosti našeg rada, i predstavlja važan element u objavljivanju otvorenih podataka, a to je – njihova vizuelna prezentacija. Uz pomoć koda, korisnici programskog jezika R moći će da ostvare dodatni uvid u podatke i način na koji su oni obrađeni, a kod je reproducibilan i može da se koristi za druge radove i analize. Kod i metodologija, koji su slobodni za preuzimanje mogu da posluže zainteresovanim da prave slične veb aplikacije uz pomoć kojih je lakše pratiti procese konkursnog sufinansiranja medijskih sadržaja u lokalnim zajednicama. Naš projekat i njegovi rezultati će, verujemo, doprineti transparentnosti celokupnog procesa i promovisanju dobrih praksi, između ostalog i kroz evaluaciju odobrenih projekata.
+
+Svi podaci su takođe [dostupni i na Portalu otvorenih podataka Republike Srbije](https://data.gov.rs/sr/datasets/rezultati-konkursa-za-projektno-sufinansiranja-medijskikh-sadrzhaja/). Naš cilj je da podržimo i preporukama potpomognemo po nama važan zadatak vlasti u procesu evrointegracija – da razviju i učine pristupačnim i funkcionalnim podatke koje “proizvode”.
+
+Za razliku od postojećih baza podataka, naš projekat po prvi put uvodi i klasifikaciju odobrenih projekata po tematskom okviru. Teme odobrenih projekata su izvođene iz njihovih naziva, a razvrstani su u osam kategorija: ekologija i zdravlje, ekonomija, informativni progam, kultura i obrazovanje, neprivilegovane grupe, ostalo, manjinski sadržaj, sport. Iako smo svesni da nazivi projekata nisu zamena za evaluaciju samih sadržaja koji su proizvedeni javnim novcem, smatrali smo da oni mogu da ukažu na neke trendove u ovoj oblasti. 
+
+Brošura je podeljena na sledeće delove: istorijat konkursnog sufinansiranja medijskih sadržaja sa ciljem da se šira javnost upozna sa ovim procesom, potom metodologija rada (ona će na aplikaciji biti izdvojena i kao poseban dokument radi lakšeg snalaženja korisnika), analiza podataka koji su prikupljeni tokom realizacije projekta i, na kraju, preporuke kako bi se mogla unaprediti transparentnost konkursnog sufinansiranja u budućnosti. Važno je reći da će naš projekat biti aktivan i u narednom periodu, odnosno da ćemo veoma rado sve ispravke (greške su moguće zbog količine i kompleksnosti podataka) i sugestije uvrstiti u naše izveštaje, pa vas molimo da nas u tu svrhu slobodno [kontaktirate](mailto:medijskikonkursi@gmail.com).
+
+## Konkursno sufinansiranje javnog interesa u sferi javnog informisanja – kratki istorijat {align=justify} 
+
+Eksperti i medijske i novinarske organizacije početkom prošle decenije verovali su da legislativne reforme odnosno novi medijski zakoni – mogu suštinski, kvalitativno na bolje, da izmene medijsku scenu Srbije i podstaknu javno informisanje u skladu sa interesima građana. Uvod u reformu bilo je usvajanje Medijske strategije^[Strategija razvoja sistema javnog informisanja u Republici Srbiji do 2016. godine ("Službeni glasnik RS", broj 75/2011)] 2011. godine, koju je – uz izvesne kritičke ograde – podržala stručna javnost. Nova vlast, ustoličena 2012. godine, formalno je nastavila putem koju je zacrtao strateški dokument iz 2014. godine, u skladu sa njim, usvojila set medijskih zakona – krovni Zakon o javnom informisanju i medijima ^[Zakon o javnom informisanju i medijima ("Službeni glasnik RS", broj 83/2014, 58/2015 i 12/2016 - autentično tumačenje)], te Zakon o elektronskim medijima^[Zakon o elektronskim medijima (“Službeni glasnik RS”, broj 83/2014 i 6/2016)]  i Zakon o javnim medijskim servisima^[Zakon o javnim medijskim servisima (“Službeni glasnik RS”, broj 83/2014, 103/2015 i 108/2016)]. Verovalo se da će novi regulatorni okvir koji ozvaničava izlazak države iz vlasništva u medijskoj sferi – omogućiti fer tržišnu utakmicu, osnažiti medijski pluralizam i smanjiti politički uticaj na medije^[Uzgred budi rečeno, i prethodni medijski zakoni, s početka dvehiljaditih, predviđali su izlazak države iz vlasništva u javnim glasilima, ali su oni suspendovani određenim podzakonskim aktima, pod izlikom da bi privatizacija medija mogla da ugrozi javno informisanje na jezicima nacionalnih manjina.]. 
+
+Sastavni deo reforme započete pre nešto više od deset godina jeste i početkom 2020. godine usvojena [Strategija razvoja sistema javnog informisanja u Republici Srbiji za period od 2020. do 2025. godine](https://www.kultura.gov.rs/tekst/sr/4993/strategija-razvoja-sistema-javnog-informisanja-u-republici-srbiji-za-period-od-2020-do-2025.php), koja zapravo utvrđuje, razrađuje, sistematizuje i unapređuje ključne elemente započetog procesa. Na žalost, tek u junu 2021. formirana je Radna grupa za izradu radne verzije Nacrta zakona o izmenama i dopunama Zakona o javnom informisanju i medijima, koju čini 35 članova i članica koji su predstavnici novinarskih i medijskih udruženja, državnih organa i institucija. Iako je entuzijastički krenula sa radom, do pisanja ovog teksta još uvek nemamo naznake kada će se Nacrt pojaviti u javnosti i kada će ući u proces javne rasprave. O tome će nešto kasnije biti reči.
+
+Pored izlaska države iz vlasništva u medijima, glavna tačka medijskih reformi bila je i ostala – uspostavljanje sistema konkursnog sufinansiranja medijskih sadržaja od javnog interesa, koji podrazumeva zakonsko definisanje javnog interesa, proceduru dodele sredstava i nezavisne, stručne komisije sastavljene od medijskih stručnjaka, odnosno predstavnika novinarskih i medijskih udruženja^[Zakon o javnom informisanju i medijima predviđa da članove stručne komisije imenuje rukovodilac organa koji je raspisao konkurs i to iz reda nezavisnih stručnjaka za medije i medijskih radnika koji nisu u sukobu interesa i ne obavljaju javnu funkciju. Većina članova, kaže zakon, imenuje se na predlog novinarskih i medijskih udruženja ukoliko takav predlog postoji i ukoliko predložena lica ispunjavaju zakonom predviđene uslove.]. Ovaj sistem bi – verovalo se – obezbedio građanima Srbije znatno više kvalitetnih medijskih sadržaja. Inače, i pre ovih legislativnih izmena Ministarstvo kulture i informisanja, Pokrajinski sekretarijat za kulturu i javno informisanje i pojedine lokalne samouprave putem konkursa su finansirali medije i medijske sadržaje, ali su to bili više primeri dobre prakse, nego proizvod jasno definisane i obavezujuće procedure. Druga važna tačka je izlazak države na svim nivoima iz vlasništva u medijima.
+
+Smisao dva međusobno zavisna elementa medijskih reformi – privatizacije medija i konkursnog sufinansiranja – jeste da se uspostavi jedan drugačiji odnos države i medija. Izlaskom iz vlasništva država ne gubi svoje ustavne obaveze^[Ustav Srbije, u članu 51, kaže da svako ima pravo da istinito, potpuno i blagovremeno bude obaveštavan o pitanjima od javnog značaja.] da obezbedi informisanje u skladu sa javnim interesom. Umesto putem državnih subvencija, odnosno sredstava javnih preduzeća, ona svoje obaveze, po novim zakonskim rešenjima, ispunjava kroz nadmetanje predloga medijskih projekata na nivou republike, pokrajine i lokalne samouprave. Dakle, država u medijsku sferu interveniše – sledeći duh zakona – da bi građanima obezbedila kvalitetno informisanje, oslobođeno od političkih, ekonomskih i drugih interesa onih koji imaju vlast i/ili moć u društvu. Stručne komisije, koje bi opet u skladu sa duhom zakona činile kompetentne i moralno neupitne osobe, trebalo bi da budu garant da vlast neće kroz trošenje javnog novca da ostvaruje i politički uticaj na finansirane medije.
+
+Zakonska rešenja podržana su i od relevantnih udruženja i od ključnih međunarodnih faktora, jer je bilo jasno da bez ulaganja državnog novca u medijsku sferu mnogi kvalitetni mediji i medijski sadržaji ne mogu da opstanu na veoma krhkom medijskom tržištu. U uslovima niske medijske pismenosti i odsustva donacija iz inostranstva – to tržište ne omogućava utakmicu u kojoj pobeđuju mediji i sadržaji koji u najvećoj meri poštuju profesionalne i etičke standarde novinarstva i otvaraju nove horizonte medijskih sloboda u skladu sa tim standardima. Već sasvim obrnuto. Zahvaljujući medijskim zakonima, Srbija je 2014. i 2015. godine doživela značajan uspon na komparativnim rang-listama međunarodnih organizacija koje mere medijske slobode u zemljama sveta, uz uverenje da stvaranje fer tržišne utakmice, uz pomenutu kvalitativnu intervenciju države, mogu da obezbede održivost medija i viši nivo medijskih sloboda.
+
+Od donošenja medijskih zakona prošlo je sedam i po godina i mi danas, sa priličnom sigurnošću, možemo da kažemo da su velika očekivanja stručne javnosti u dobroj meri – izneverena, jer medijske reforme nisu medijsku scenu Srbije učinile kvalitetnijom, niti su obezbedile preko potreban pluralizam u javnom informisanju. Naprotiv. Neki smatraju da je problem sa kojim se suočava medijska scena komplementaran sa problemima u drugim oblastima – a to je loša implementacija zakona, dok drugi opet smatraju da bi se kroz ponovnu izmenu zakona situacija mogla značajno popraviti.Mnogi eksperti, međutim, smatraju da su i važeći zakoni, uz dobru upravu, mogli značajno da unaprede medijsku scenu, i postavljaju pitanje: da li je moguće da se izmenama zakona vlast natera da te zakone i poštuje? Što se tiče konkursnog sufinansiranja, ako izuzmemo nekoliko primera dobre prakse na republičkom nivou, po pravilu, pogotovo na nižim nivoima vlasti, nije sproveden duh zakona koji bi trebalo da onemogući organima vlasti da putem konkursa ostvaruju i politički uticaj na medije.Nasuprot tome, u praksi su favorizovani oni provatni mediji koji su pod manje ili više snažnim uticajem političara na vlasti, kao i oni mediji koji su tokom privatizacije dospeli u ruke osoba koje su – o čemu je bilo dosta napisa u medijima – povezane sa vladajućim partijama.
+
+Iako Pravilnik^[Pravilnik je podzakonski dokument koji donosi Ministarstvo kulture i informisanja i koji važi za sve nivoe vlasti.] o sufinansiranju projekata od javnog interesa u sferi javnog informisanja među važne kriterijume za ocenu vrednosti projekata navodi – poštovanje etičkih i profesionalnih standarda^[Pravilnik o sufinansiranju projekata za ostvarivanje javnog interesa u sferi javnog informisanja (“Službeni glasnik”, broj 16/2016 i 8/2017) navodi da su kriterijumi na osnovu kojih će se ocenjivati prijavljeni na konkurs: 1) mera u kojoj je predložena projektna aktivnost podobna da ostvari javni interes u oblasti javnog informisanja; i 2) mera pružanja veće garancije privrženosti profesionalnim i etičkim medijskim standardima.], veoma se često dešava da upravo mediji koji svakodnevno, na neprikriven način, krše Kodeks novinara Srbije redovno, i to u značajnim iznosima, dobijaju sredstva kroz mehanizam konkursnog sufinansiranja^[Pogledajte, recimo, istraživanje Saveta za štampu pod nazivom [„Sufinansiranje medija koji krše etičke standarde“](http://www.savetzastampu.rs/latinica/uploaded/Izveštaj%20-Sufinansiranje%20medija%20koji%20krše%20etičke%20standarde.pdf) (Savet za štampu, Beograd, jun 2020).].Recimo, prema našoj bazi, dva izdavača, Insajder media tim i Info IT media, koji se vezuju za dnevni list „Informer“, poznatog po dramatičnom kršenju novinarskog kodeksa, prihodovao je u posmatranim godinama kroz ovaj mehanizam čak `r informerdin` dinara (`r informereur` evra).  Osim toga, u nezavisne stručne komisije, koje bi trebalo – kako smo rekli – da budu sastavljene od stručnih i moralno nespornih osoba sa bogatim iskustvom – imenuju se anonimne ličnosti za koje postoji opravdana sumnja da ne odlučuju o kvalitetu projekta već samo sprovode u delo ranije donesene odluke predstavnika vlasti, što je u oštroj suprotnosti sa duhom medijskih reformi.
+
+### Stručne analize i preporuke {align=justify}
+
+Već prve stručne analize procesa konkursnog sufinansiranja javnog interesa u sferi javnog informisanja konstatovale su probleme u implementaciji ovog modela intervenisanja države u medijsku sferu. Bela knjiga^[ [Bela knjiga konkursnog sufinansiranja javnog interesa u sferi javnog informisanja, april 2015- april 2016, Koalicija novinarskih i medijskih udruženja – Centar za održive zajednice, maj 2016.](http://www.ndnv.org/wp-content/uploads/2016/06/BelaKnjigaWEB.pdf)], koju su objavila novinarska i medijska udruženja i koja je pratila ovaj proces u prve dve godine primene zakona, konstatovala je da su najveći problemi sa kojima se suočava konkursno sufinansiranje – nedorečena zakonska regulativa, nedovoljna transparentnost procesa, nedostatak evaluacije realizovanih projekata (i samog procesa), kao i nepostojanje sankcija za organe nadležne za poslove javnog informisanja u slučaju kršenja zakona. U knjizi je evidentiran veliki broj “mimoilaženja” zakona, a konstatovano je da u stručne komisije veoma često ulaze predstavnici nereprezentativnih udruženja, što je “najčešći signal za moguće neregularnosti i nepravilnosti”. Bela knjiga, pored ostaloga, preporučuje da se obezbede mehanizmi koji će omogućiti transparentnost procesa, evaluaciju projekata, kao i učešće u konkursnim komisijama kompetentnih i moralno neupitnih osoba. Osim toga, preporučuje se da se lokalne samouprave obavežu da raspisuju konkurse za medije, pošto je konstatovano da neke od njih to nisu učinile, što je protivno njihovoj zakonskoj obavezi^[Član 20 (stav 10) Zakona o lokalnoj samoupravi ("Službeni glasnik RS", broj 129/2007, 83/2014 - dr. zakon, 101/2016 - dr. zakon i 47/2018) među nadležnosti lokalne samouprave svrstava i „staranje o javnom informisanju na teritoriji u opštini“.]. Pored toga, Bela knjiga se bavila i količinom opredeljenog novca na konkursu u odnosu na budžet lokalne samouprave, a jedna od članica Koalicije – Udruženje novinara Srbije – vodila je kampanju da se zakonski samouprave obavežu da dva odsto svog budžeta izdvajaju za medije^[Spomenimo da Grad Kragujevac od 2015. godine, od usvajanja novog seta medijskih zakona, pa do 2020. godine niti jednom nije raspisala konkurs za sufinansiranje medijskih sadržaja od javnog interesa. 2021. godine je ovaj Grad po prvi put raspisao konkurs za medijske sadržaje. Neke druge lokalne samouprave su raspisivale konkurse u simboličkoj vrednosti, koje ne odgovaraju – prema procenama udruženja – potrebama građana]. 
+
+Na žalost, nalazi i preporuke Bele knjige nikada nisu dobile svoj odgovor u izmeni zakona, podzakonskih akata ili poboljšanju prakse organa vlasti koji raspisuju medijske konkurse. Naprotiv, praksa se u narednim godinama značajno pogoršala, o čemu su brojni mediji – a najčešće istraživački centri poput CINS-a, KRIK-a i BIRN-a – redovno izveštavali. Poruka velikog broja istraživačkih i analitičkih radova o konkursima, prevashodno na lokalnom nivou, glasi da su mediji bliski vlasti (među njima, kako rekosmo, i oni koji ne drže odveć do Kodeksa novinara Srbije) apsolutni favoriti prilikom dobijanja sredstava na konkursima, dok su ona glasila koja imaju kritički otklon od vlasti – potpuni autsajderi. U mnogim slučajevima, konkursno sufinansiranje se u svojoj suštini pretvorilo u plaćanje marketinških usluga, odnosno finansiranje medija zarad nekritičke promocije aktivnosti predstavnika vlasti, što je u dubokom neskladu sa ciljem i smislom medijskih reformi. 
+
+Bela knjiga, koja je, kako rekosmo, posmatrala primenu zakona tokom 2015. i 2016. godine ne konstatuje kao veliki problem sufinansiranje medija koji kontinuirano i dramatično krše Kodeks novinara Srbije. Iz prostog razloga što toga u praksi nije bilo u značajnoj meri. I zaista, i analiza koja je pred vama pokazuje da se taj problem pojavio kasnije, odnosno da je protivno kriterijumima koje određuje Pravilnik o sufinansiranju medija, zabeležen veliki odliv novca građana ka medijima koji uobičajeno krše profesionalni kodeks tek u periodu od 2017. godine naovamo.
+
+Recimo, prema [analizi Saveta za štampu](https://savetzastampu.rs/vesti/saopstenje-za-javnost-8/), u periodu od jula do septembra, deset dnevnih listova prekršilo je Kodeks novinara Srbije čak 2.625 puta. Neslavni rekorder je list "Alo" (570), potom sledi "Informer" (448), a trećeplasirani je dnevnik "Srpski telegraf" (437). Izdavači koji se vezuju za ova tri lista, Insajder media tim, Info IT media, Medijska mreža i Alo media system prema našoj bazi, u procesu konkursnog sufinansiranja od početka 2015. godine do kraja 2021. godine prihodovali su čak `r tabloididin` dinara (`r tabloidieur` evra).
+
+KRIK-ov portal “Raskrikavanje” vodio je evidenciju konkursnog sufinansiranja medijskih sadržaja proteklih godina, i takođe je došao do zaključka da su ogromna sredstva građana završila u džepovima vlasnika medija bliskih vlastima koji su istovremeno rekorderi u kršenju zakona i etičkog kodeksa, kao i u širenju lažnih vesti i govora mržnje^[Pogledajte [Ke$formisanje](https://www.raskrikavanje.rs/kesformisanje/index.php)]. Postoji još jedno pravilo: na konkurs se sa velikim uspehom prijavljuju i manje poznate produkcijske kuće, koje su takođe vezane pre svega za elektronske medije bliske vlasti i koje uglavnom služe samo kao još jedan kanal za finansiranje tih glasila.
+
+Istraživanje i analiza koja je pred vama pokazuje država Srbija u posmatranom periodu, na svim nivoima, na ime medijskih projekata izdvaja od `r paste(round(yearstable[1,2]/ 1e6, 1))` miliona do nešto više od `r paste(round(yearstable[6,2] / 1e6, 0))` miliona evra (2020). Primetna je tendencija porasta iz godine u godinu, s tim što je u 2021. godini zabeležen manji pad u odnosu na prethodnu (2021. je dodeljeno približno `r paste(round(yearstable[7,2]/ 1e6, 1))` miliona evra). Uz ovakvu primenu zakona i zabeležene probleme zaključak se nudi sam po sebi – konkursno sufinansiranje je u dobroj meri pretvoreno u sistem za finansiranje “poslušnih medija”, a ne onih, kvalitetnih informativnih sadržaja koji su u skladu sa interesima građana i koji će tim građanima pomoći da donose,valjano informisani, važne odluke u životu.
+
+### Kako dalje? {align=justify}
+
+Osim Bele knjige, postoji čitav niz istraživanja koje su proteklih godina tretirala konkursno sufinansiranje medijskih sadržaja. Neke smo već spomenuli, neke nismo^[Pogledajte, recimo, jako korisnu analizu [„Uređenje projektnog sufinansiranja medijskih sadržaja: Pravna analiza sa preporukama“](http://birnsrbija.rs/wp-content/uploads/2017/11/UREĐENJE-PROJEKTNOG-SUFINANSIRANJA.pdf), BIRN, Beograd 2017.], ali su sva unisona u tome da problema u ovoj oblasti ima mnogo, a da je povećanje transparentnosti celokupnog procesa preduslov da se oni počnu rešavati. Usvojena početkom 2020. godine, nova Medijska strategija^[Strategija razvoja sistema javnog informisanja u Republici Srbiji za period 2020-2025. godine ("Službeni glasnik", broj 11 od 7. februara 2020.)] veliku pažnju posvećuje konkursnom sufinansiranju i načinima kako ovaj proces može da se unapredi, objedinjujući u sebi sve dosadašnje stručne uvide i analize. Na ovom segmentu u dokumentu, sudeći po obimu i rešenjima, verovatno se najduže radilo. Jasno je da i ovaj dokument snažno podržava transparentnost procesa.
+
+Strategija, kao i brojne analize, konstatuju da su u raspodeli sredstava prilikom konkursnog sufinansiranja favorizovani mediji koji su „po uređivačkoj politici bliski vladajućoj stranci“. Konstatuje se i da ovakvo sprovođenje zakona predstavlja jedan od „dominantnih oblika pritiska“ na medije, pogotovo na osiromašenom, lokalnom nivou. Strategija predviđa čitav niz mera koje je potrebno preduzeti da bi se obezbedilo „adekvatno ostvarivanje svrhe projektnog sufinansiranja“, pa se predlaže i izmena i dopuna postojeće regulative, u smislu uvođenja analize nedostajućih sadržaja, sankcija za nepoštovanje zakona, potom propisivanja kriterijuma za članove stručnih komisija za ocenu kvaliteta projekata i njihove čvršće obaveze da prilikom procene kvaliteta određenog projekta vode računa o poštovanju profesionalnih i etičkih normi podnosioca,, i tu u sferi štampanih i internet medija vidi važnu ulogu Saveta za štampu.
+
+Medijska strategija i njen prateći dokument, Akcioni plan, predviđaju, pored toga, obavezu nezavisne evaluacije sprovedenih projekata i isključenje mogućnosti da projektno sufinansiranje služi za pokrivanje troškova van pripadajućih troškova proizvodnje sadržaja od javnog interesa. Posebno je interesantna jedna stavka u vezi sa transparentnošću čitavog procesa, a koja podrazumeva „uvođenje mogućnosti centralizovanog sistema apliciranja posredstvom jedinstvene informacione platforme, čime bi se, između ostalog, omogućila primena zakonskih odredaba koje zabranjuju finansiranje, preko određenog procenta, istih projekata od različitih nivoa vlasti, ali i dostupnost na ovaj način finansiranih sadržaja svima, na širim područjima od onih na kojima se određeni mediji distribuiraju, i to na način što bi informaciona platforma davala mogućnost pretraživanja projekata, prijava i odluka po njima, te sadržala linkove na emitovane, odnosno objavljene na ovaj način finansirane sadržaje“.
+
+Ova informaciona platforma je u skladu sa inicijativom Odbora za ljudska prava iz Niša, koji se već godinama zalaže za to da svi medijski sadržaji podržani putem konkursnog sufinansiranja budu jednostavno i besplatno dostupni građanima, čime će se pojednostaviti evaluacija projekata, unaprediti njihov kvalitet i smanjiti potencijalne zloupotrebe^[[„Kako unaprediti transparentnost medijskih sadržaja sufinansiranih javnim novcem?“, analiza, Odbor za ljudska prava, Niš, novembar 2020.](https://chrin.org.rs/wp-content/uploads/2020/11/Kako-unaprediti-transparetnost-medijskih-sadrzaja-sufinansiranih-javnim-novcem.pdf)]. Naša baza se, u tom smislu, može tumačiti i kao važan korak u tom pravcu.
+
+Nacrt Zakona o izmenama i dopunama Zakona o javnom informisanju i medijima  privodi se kraju. Veoma je važno primeniti rešenja iz Medijske strategije i otkloniti nedostatke koji se pominju i u našem prošlogodišnjem izveštaju  ali i u monitoring izveštajima drugih organizacija koje prate ovaj proces. Podsetimo, Savet za štampu daje mišljenje o podnosiocima projekta u smislu poštovanja odredbi Kodeksa novinara Srbije. Iako nije obavezujuće, ovo mišljenje bi trebalo da imao snažan uticaj na članove konkursnih komisija. Tendencija da se razvodnjava uloga Saveta za štampu je u suprotnosti sa Medijskom stategijom i propisima na snazi. I da dodamo da je jednako važno da se uvede analiza nedostajućeg sadržaja i evaluacija podržanih projekata jer se i za to strateški opredelila država u strategiji.  
+
+Vratimo se na novu Medijsku strategiju, koja je nesporno kvalitetan dokument. Jasno je da su se članovi radne grupe za izradu ovog dokumenta – kako smo rekli – zaista potrudili da oblast konkursnog sufinansiranja bude valjano obrađena, ali ostaje ključno pitanje koje smo već postavili ranije – da li se izmenama zakona vlast može naterati da poštuje zakone? Naime, pojedini medijski stručnjaci upozoravaju da u političkom kontekstu koji ne podrazumeva visok stepen vladavine prava, a o čemu govore i izveštaji evropskih institucija o napretku Srbije u procesu evro-integracija, lako se mogu iznaći mehanizmi koji će i najsavršenije zakonske odredbe mimoići. Ipak, preostaje da se nadamo da će promene zakona koje proisteknu iz strateškog dokumenta izmeniti praksu da pomoću mehanizma konkursnog sufinansiranja vlast usmerava javna sredstva “svojim medijima”, a eventualno neke mrvice ostavi za one nezavisne. Kako vreme prolazi, nade su sve manje.
+
+Konkretno, pogledajmo recimo odredbe koje predviđaju da članovi konkursnih komisija imaju potrebnu, definisanu stručnost. Svakako je to nešto što je dobro i važno, ali ruku na srce, vlast će – ukoliko bude htela – pronaći desetine stručnih lica koji neće ni razmatrati projekte već će samo sprovesti unapred donesene političke odluke. Neki upozoravaju da ni državni organi ni nevladine organizacije nemaju kapaciteta da sprovedu kvalitetnu evaluaciju projekata s obzirom na njihov ogromni broj, kako pokazuje i ova naša analiza. Naime, u periodu od 2015. do decembra 2021. godine ukupno je finansirano, na svim nivoima vlasti, `r format( nrow(brojprojekata),big.mark=',', digits = 0, nsmall=0, scientific = FALSE)` medijskih projekata.
+
+Postojeće analize i pretraživi podaci o procesu projektnog  sufinansiranja (poput ove veb aplikacije koja je pred vama) omogućavaju nam da u dobroj meri razumemo proces konkursnog sufinansiranja od 2015. godine (prve godine primene zakona), da pronalazimo rešenja kako da se on unapredi, makar sve to bilo za neka, druga buduća vremena, kada ćemo živeti u demokratskoj zemlji u kojoj se neguje kvalitetno novinarstvo koje je u skladu sa interesima građana, nezavisnost institucija i tradicija medijskih sloboda. Ako ćemo da budemo optimistični, možemo reći da je ovaj proces, ako ništa drugo, omogućio da imamo jasan i precizan uvid u ovaj segment odnosa između državnih organa i medija.
+
+I na kraju treba reći da je, onako kako je zamišljen, proces konkursnog sufinansiranja medijskih sadržaja model koji bi, ukoliko bi zaista bio sproveden onako kako to zahteva stručna javnost, zaista mogao značajno da unapredi našu medijsku scenu. I stoga ne treba lako odustajati od njega i njegovog poboljšanja.
+
+## Metodološke napomene {align=justify}
+
+Osnovni predmet našeg istraživanja i analize bila su rešenja o raspodeli sredstava na konkursima za sufinansiranje javnog interesa u sferi javnog informisanja, koje smo prikupljali pozivajući se na Zakon o dostupnosti informacija od javnog značaja ili pretražujući portale organa vlasti - u slučaju Ministarstva kulture i informisanja i Pokrajinskog sekretarijata za kulturu, javno informisanje i odnose sa verskim zajednicama i još nekih lokalnih samouprava sa funkcionalnim sajtovima. Manji deo podataka smo prikupili zahvaljujući postojećim bazama konkursnog sufinansiranja, o čemu smo izvestili u odeljku Uvodne reči u publikaciji.
+
+Podsećamo da po Zakonu o javnom informisanju i medijima svaki organ vlasti koji je raspisao konkurs donosi odluku o raspodeli sredstava u obliku rešenja (sa obrazloženjem). U proteklih šest godina procesa konkursnog sufinansiranja primetan je napredak u samim rešenjima, koja su u prvim godinama bila umnogome nedostatna^[Mnoga rešenja nisu sadržala neke od osnovnih podataka, neka su izostavljala ime podnosioca projekta, neka ime medija, neka naziv projekta.]. Ne samo da ona sada sadrže, u najvećoj meri, obrazloženja odluke već se upotpunjuju i druge dostupne informacije, što nam je olakšalo rad na selekciji podataka. Ipak, sadržaj rešenja je još daleko od onoga što bi, po našem mišljenju, trebalo da se nalazi u njima, i što smo naveli u preporukama koje možete naći na kraju ove brošure. Pre svega oni ne sadrže mašinski čitljive podatke, što umnogome otežava rad istraživačima i analitičarima.
+
+Sve podatke, sistematizovane, i veb aplikaciju možete pronaći i slobodno preuzeti na [našem sajtu](https://centarzaodrzivezajednice.shinyapps.io/Projektno_sufinansiranje_medija_u_Srbiji/), na kojem možete da pronađete i druge proizvode našeg projekta. Na sajtu možete da pronađete [link ka kodu za kreiranje same aplikacije](https://github.com/Centarzaodrzivezajednice/Projektno-sufinansiranje-medija). Uz pomoć koda, korisnici programskog jezika R moći će da ostvare dodatni uvid u podatke i način na koji su oni obrađeni, a kod je reproducibilan i može da se koristi za druge radove i analize.
+
+Smisao metodoloških napomena, koje su pred vama, nalazi se pre svega u tome da se razume proces prikupljanja i selektovanja podataka za izradu veb aplikacije, ali i da se olakša njeno korišćenje.
+
+### Objašnjenje kolona sa podacima na veb aplikaciji
+
+Tabela koju možete da preuzmete u excel i csv formatu sadrži sledeće kolone:
+
+1.	**ORGAN KOJI RASPISUJE KONKURS/OPŠTINA** – odnosi se na instituciju koja je raspisala konkurs: Ministarstvo kulture i informisanja, Pokrajinski sekretarijat za kulturu, javno informisanje i odnose sa verskim zajednicama i `r brojopstina` lokalne samouprave (gradovi i opštine). Pošto gradske opštine nisu u obavezi da raspisuju konkurse za projektno sufinansiranje, navedene su samo one gradske opštine koje su makar jednom objavile konkurs ( za Beograd to su Lazarevac, Mladenovac i Obrenovac, a za Niš – Pantelej, Crveni Krst i Medijana).
+
+2. **MATIČNI BROJ GRADA/OPŠTINE** – Ova kolona se nalazi samo u podacima koji se mogu skinuti u excel i csv formatu  i predstavlja matični broj grada ili opštine koji su raspisali konkurs. Ti podaci su preuzeti sa [sajta Republičkog geodetskog zavoda](https://rgz.gov.rs/o-nama/spisak-katastarskih-op%C5%A1tina).  
+
+3.	 **GODINA** – kolona koja se odnosi na godinu kada je doneto rešenje o dodeli sredstava. 
+
+4.	**PODNOSILAC PROJEKTA** – Ova kolona beleži nazive podnosilaca projekata (preduzeća, agencije i drugo). Podaci su proveravani na [sajtu APR-a](https://www.apr.gov.rs). Zbog neujednačenog korišćenja velikih i malih slova u registru APR-a, svi podnosioci projekata su ispisani verzalom (velikim slovima). U nekim situacijama podnosilac projekta predstavlja instituciju poput fakulteta ili religijske organizacije koja nije registrovana u APR-u. Njihov naziv je, u tom slučaju, preuziman iz rešenja samog konkursa.
+
+5.	**MATIČNI BROJ PODNOSIOCA** – Ova kolona se nalazi samo u podacima koji se mogu skinuti u excel i csv formatu. Matični broj je preuzet sa sajta APR-a. Pošto se među podnosiocima projekata nalaze i institucije poput Fakulteta političkih nauka, uneti su matični brojevi iz registara kojima oni pripadaju. Takođe, postoje slučajevi za koje na APR-ovom sajtu ne postoji informacija o matičnom broju, a postoje i  neki podnosioci koji su registrovani na teritoriji AP Kosovo i Metohija kojih nema u registru i oni su zavedeni pod šifrom **11111111**. Ukoliko su podnosioci entiteti registrovani izvan granica Republike Srbije, dodeljena im je šifra **22222222**.
+
+6.	**NAZIV MEDIJA** – Ova kolona se odnosi na naziv medija kome su dodeljena sredstva. Podsećamo da postoji zaseban registar medija koji se vodi kod APR-a, i da mediji nemaju svojstvo pravnog lica, već to ima njihov osnivač (podnosilac projekta). Nazivi medija su takođe usaglašavani sa bazom APR-a. Ukoliko su finansirani stručni skupovi, konferencije ili radionice i to je bilo jasno naznačeno u nazivu projekta – ova kolona je ostavljena prazna. Ukoliko nije data informacija kojem mediju su data sredstva za proizvodnju sadržaj preuzet je ključ iz nekih rešenja konkursa poput Pokrajinskog sekretarijata i upisivana je reč “Produkcija” u ovu kolonu. U situacijama kada je izdavač medija vlasnik samo jednog medija prema APR-u, a nije naveden naziv medija u rešenju konkursa, stavljan je naziv tog medija iz APR-a.
+
+7.	**NAZIV PROJEKTA** – Ova kolona se popunjava ukoliko se nazivi projekata nalaze u rešenjima. Ukoliko oni nisu navedeni, polje ostaje prazno. Ukoliko je konkurs poništen, konkurs nije raspisan ili sredstva nisu dodeljena sve je podvedeno pod stavku – sredstva nisu dodeljena. U slučaju konkursa za AP Kosovo i Metohiju i konkursa za informisanje na srpskom jeziku van teritorije Republike Srbije – ta informacija je dodata u zagradu odmah posle naziva projekta.
+
+8.	**TEMA PROJEKTA** – Teme projekata su izvođene iz njihovih naziva, tamo gde su oni bili navedeni. Identifikovali smo i klasifikovali osam tematskih okvira: ekologija i zdravstvo, ekonomija, informativni program, kultura i obrazovanje, neprivilegovane grupe, ostalo, manjinski sadržaj i sport. Te teme prate definiciju javnog interesa iz Zakona o javnom informisanju i medijima. Tamo gde nije bilo naziva projekta, ova kolona je ostala nepopunjena. Određeni broj naziva projekata koji ne potpadaju ni pod jednu od navedenih tema zavedeni su pod – Ostalo. Jasno je da ovo nije savršen metodološki pristup i da bi jasno definisanje tematskog okvira bilo moguće odrediti tek kroz evaluaciju projekata. Dakle, u pitanju je indikacija tema, koja po nama može da prikaže određene trendove. Nadamo se da će rezultati našeg projekta omogućiti istraživačima lakši rad na dubljim i specifičnijim analizama konkursnog sufinansiranja.
+
+- **Ekologija i zdravstvo**
+
+Ova tema široko obuhvata sve što se odnosi na zaštitu životne sredine i zaštitu zdravlja.
+
+- **Ekonomija**
+
+Ova tema je široko obuhvatila poljoprivredu, turizam, ekonomski segment evropskih integracija i razvoj sela.
+
+- **Informativni program**
+
+Ova tema je obuhvatila proizvodnju informativnog programa. Iako je u nekim slučajevima sufinansiranje informativnog programa bilo opravdano, ostaje utisak da u velikom broju slučajeva nije bio finansiran zakonom definisan javni interes, već redovna medijska produkcija. Ovo može takođe da bude tema za dublju analizu.
+
+- **Kultura i obrazovanje**
+
+Ova tema je široko obuhvatila kulturne i razne edukativne sadržaje, uključujući i organizaciju stručnih skupova.
+
+- **Manjinski sadržaj**
+
+Ova tema je obuhvatila ne samo proizvodnju sadržaja na manjinskom jeziku već i sadržaj koji govori o određenim manjinama i njihovoj kulturi. Svi medijski sadržaji na manjinskim jezicima su stavljani u “manjinsku kategoriju” iako su i oni, naravno, tematski raznorodni. Cilj takvog pristupa je bilo tretiranje informisanja na manjinskim jezicima kao zasebnog fenomena – sa ciljem da se može posmatrati na koji način se država brine o njemu. Naravno, i na ovu temu preporučujemo dalja, dublja istraživanja čija osnova mogu da budu – podaci i veb aplikacija nastali u okviru realizacije ovog projekta.
+
+- **Neprivilegovane grupe**
+
+Ova tema je široko postavljena da obuhvati razne grupe, poput osoba sa invaliditetom, dijabetesom, multiplesklerozom, ali i grupe kao što su – žene, mladi, stari i deca. Ova klasifikacija je isuviše široko postavljena i ona bi se u daljem radu mogla podeliti na određene podteme.
+
+- **Sport**
+
+Ova tema obuhvata proizvodnju sportskih medijskih sadržaja.
+
+- **Ostalo**
+
+U ovu temu su ušle podteme poput verskih i religioznih, kao i tema kao što je povećanje nataliteta. U ovu kategoriju su klasifikovane i teme koje nisu bile dovoljno jasno definisane da bi mogle nedvosmisleno da se podvedu pod bilo koju gore pomenutu oblast.
+
+9.	**SREDSTVA U DINARIMA** – Ova kolona predstavlja nominalne vrednosti koje su date određenom podnosiocu projekta na osnovu rešenja za dodelu sredstava. Zbog toga što su ove vrednosti nominalne, ne koriste se za poređenja po godinama i kumulativne prikaze u grafikonima, već se za to koristi kolona SREDSTVA U EVRIMA.
+
+10.	**SREDSTVA U EVRIMA** – Ova kolona je obračunata na osnovu srednjeg godišnjeg kursa evra za svaku godinu od 2015-2021, a podaci su uzeti sa [sajta Narodne banke Srbije](https://www.nbs.rs/sr_RS/finansijsko_trziste/medjubankarsko-devizno-trziste/kursna-lista/prosecni-kursevi/index.html). Iz tog razloga se ova kolona koristi za poređenja po godinama i kumulativne vrednosti u grafikonima i tabelama. Istraživači su svesni da bi realističniji prikaz predstavljalo korišćenje realnih vrednosti koje bi se preračunale na osnovu indeksa potrošačkih cena, ali zbog lakšeg razumevanja celokupne tabele, odlučeno je da se za to ipak koristi srednji kurs evra.
+ 
+### Kod za veb aplikaciju i online publikaciju
+
+Kod koji možete da preuzmete sa sledećeg [linka](https://github.com/Centarzaodrzivezajednice/Projektno-sufinansiranje-medija) - pisan je u R programskom jeziku. Cela aplikacija je izrađena uz pomoć prevashodno biblioteke shiny. Sam kod, koji možete naći u fajlu app.R na prethodnom linku, je podeljen u 3 dela: obrada samih podataka, ui (user interface) koji se odnosi na definisanje izgleda same aplikacije i server dela gde se zapravo kreira interaktivnost i povezanost različitih delova aplikacije. Delovi označeni sa # predstavljaju komentare koji objašnjavaju šta koji deo koda radi. To treba da olakša razumevanje koda. Sam kod i podaci mogu da se preuzmu pod licencom [Creative Commons Zero v1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/). Iako je ovo najotvorenija moguća licenca, zaista bismo voleli da ako budete koristili podatke ili kod za veb aplikaciju da nas o tome obavestite kako bi mogli da pratimo njenu dalju upotrebu i razvoj i za to vam se unapred zahvaljujemo. Pored koda za izradu same aplikacije, imate priliku da  takođe preuzmete i kod koji je korišćen za izradu online verzije publikacije ( fajlovi Index.html i  Index.Rmd), a koja će se ažurirati ukoliko dođe do promene podataka. To je još jedan način na koji želimo da podržimo potpunu transparentnost i reproducibilnost istraživanja u ovoj oblasti sa krajnjim ciljem da i drugi mogu doprineti poboljšanju i aplikacije i same analize. Sigurni smo da zajedničkim naporima sa otvorenim pristupom možemo ovaj proces učiniti značajno boljim.
+
+## Analiza prikupljenih podataka {align=justify}
+
+Analiza prikupljenih podataka tokom realizacije projekta „Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja“ koja je pred vama – nije sveobuhvatna, već predstavlja tek primer na koje se sve načine datim podacima može prići i na koji način se oni mogu tretirati. Kao što smo rekli u uvodu, cilj našeg projekta je prevashodno bio da istraživačima, predstavnicima medija i organa vlasti i drugim zainteresovanima – obezbedimo pristup sistematizovanim podacima i njihovo funkcionalno korišćenje. Podaci i prateća aplikacija mogu da budu korisni za razna istraživanja, ali i da budu podloga za dalji rad na prikupljanju potrebnih informacija za neke buduće, dublje i šire analize. Za razliku od postojećih baza, ova omogućava da se podaci mogu preuzeti u otvorenom i mašinski čitljivom formatu za dalje analize, a, pored toga, uvodi i klasifikaciju odobrenih projekata na osnovu tematskog opsega. U metodologiji smo pojasnili kako smo izvršili tematsku kategorizaciju odobrenih projekata.
+
+Kao što smo ranije rekli, prva godina implementacije medijskih zakona usvojenih u avgustu 2014. godine – bila je 2015. Naše istraživanje obuhvata period od početka te godine do decembra 2021, kada smo prikupili poslednje podatke. U tom smislu, ne možemo sa sigurnošću da potvrdimo da prikupljeni podaci obuhvataju celu 2021, odnosno da neki konkursi nisu raspisani i nakon završetka sakupljanja informacija, odnosno na samom kraju godine. Osim toga, podaci ne obuhvataju tzv. pojedinačna davanja, odnosno sredstva koja se raspodeljuju odlukom rukovodioca organa nadležnog za poslove javnog informisanja bez sprovođenja javnog konkursa. Za pojedinačna davanja može se opredeliti najviše 5% sredstava od ukupno opredeljenih sredstava za ostvarivanje javnog interesa putem javnih konkursa.
+
+Pojedini medijski stručnjaci su 2015. nazivali i „nultom godinom“ primene zakona, podrazumevajući pod tim da će se mnoge lokalne samouprave po prvi put susresti sa fenomenom konkursnog sufinansiranja medijskih sadržaja, odnosno da će to za njih biti jedan potpuno novi mehanizam. U tom smislu su očekivani i neki propusti, to jest nesnalaženja u novim zakonskim datostima. Već smo rekli da su Ministarstvo kulture i informisanja (u daljem tekstu: Ministarstvo), Pokrajinski sekretarijat za kulturu i informisanje (u daljem tekstu: Sekretarijat), kao i pojedine lokalne samouprave i u ranijem periodu raspisivali medijske konkurse, te da se može reći da su oni spremno dočekali novu medijsku legislativu.
+
+U periodu od početka 2015. do decembra 2021. godine ukupan broj odobrenih medijskih projekata na svim nivoima iznosi `r format(nrow(brojprojekata),big.mark=',', digits = 0, nsmall=0, scientific = FALSE)`, a od toga je Ministarstvo finansiralo   `r brojprojekataorgan1[2,2]`, Sekretarijat `r brojprojekataorgan1[3,2] `, a lokalne samouprave (njih ukupno `r brojopstina`) – `r brojprojekataorgan1[1,2]`. Treba imati u vidu da `r nrow(opstinebezkonkursa) ` lokalnih samouprava od `r brojopstina` analizirane (`r opstinebezkonkursa[1,1]`, `r opstinebezkonkursa[2,1]`, `r opstinebezkonkursa[3,1]`, `r opstinebezkonkursa[4,1]`, `r opstinebezkonkursa[5,1]`, `r opstinebezkonkursa[6,1]`, `r opstinebezkonkursa[7,1]`, `r opstinebezkonkursa[8,1]`, `r opstinebezkonkursa[9,1]` i `r opstinebezkonkursa[10,1]`) u periodu od 2015. do 2021. nisu raspisali niti jedan konkurs. Konkurse nije objavljivala niti većina gradskih opština, ali one nisu (izuzev beogradskih opština Obrenovac, Mladenovac i Lazarevac i niških Medijana, Crveni Krst i Pantelej) uzimane u obzir, jer po tumačenju zakona nisu ni bile u obavezi da konkursno sufinansiraju medije. Dobra vest je da je 2021. godine Grad Kragujevac po prvi put raspisao konkurs za sufinansiranje medijskih sadržaja u skladu sa javnim interesom i u tu svrhu opredelio 9.224.000 dinara odnosno 78.400 evra. Pred vama su interaktivni grafikoni. Prelaskom kursora preko njih videćete informacije.
+
+
+```{r echo=FALSE, fig.cap = "Grafikon 1.1"}
+
+# Kreiranje bar charta  za broj projekata prema organu koji je dodelio sredstva
+
+brojprojekatagraf <- ggplot (data = brojprojekataorgan, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`,`BROJ PROJEKATA`), y = `BROJ PROJEKATA`,label = `Info`))+
+          
+            geom_bar (stat = "identity",fill = c("#9F2A63FF","#F57D15FF","#FAC127FF"))+
+            
+            xlab ("Organ koji je raspisao konkurs")+
+          
+            ylab ("Ukupan broj projekata")+
+          
+      ggtitle (paste("Ukupan broj projekata od 2015.\n na svim nivoima do decembra 2021.godine iznosi", format(nrow(brojprojekata), big.mark = ",")))+
+
+            coord_flip()+
+          
+            theme (legend.position = "none",
+                   
+                   panel.background = element_rect (fill = "transparent"),
+                   
+                   plot.background = element_rect (fill = "transparent", color = NA),
+                   
+                   plot.title = element_text ( hjust = 0.5),
+                   
+                   axis.text.y = element_blank(),
+                   
+                   axis.ticks = element_blank(),
+                   
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
+        
+        ggplotly(brojprojekatagraf, tooltip = "Info") %>%
+          
+            config(displayModeBar = FALSE) %>%
+          
+            layout(annotations = 
+                       list(x = 1, y = -0.25, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
+                            
+                            showarrow = F, xref = 'paper', yref = 'paper', 
+                            
+                            xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0,
+                            
+                            font = list(size = 11)))
+        
+```
+
+
+Broj odobrenih medijskih projekata povećavao se iz godine u godinu, do 2020. Ukupan broj podržanih projekata na svim nivoima vlasti tokom 2015. godine iznosio je `r brojprojekatagodina1[1,2]`, da bi kasnije iz godine u godinu rastao (2016 – `r brojprojekatagodina[2,2]`, 2017 – `r brojprojekatagodina1[3,2]`, 2018 – `r brojprojekatagodina1[4,2]`, 2019 – `r brojprojekatagodina1[5,2]` 2020 – `r brojprojekatagodina1[6,2]`). Tokom 2021. godine zabeležen je pad odobrenih projekata (`r brojprojekatagodina1[7,2]`), što je približno broju projekata odobrenih 2018. godine.
+
+
+```{r echo=FALSE, warning=FALSE, fig.cap ="Grafikon 1.2"}
+
+# Kreiranje line charta  za broj projekata po godinama od svih organa koji su raspisali konkurs
+
+brojprojekatagrafgod <- ggplot (brojprojekatagodina, aes(as.factor(GODINA), `BROJ PROJEKATA`, label = Info))+
+          geom_point(color = "#1DA460")+ 
+            geom_line(aes(group = 1),colour = "#1DA460")+
+          
+            ggtitle("Rast broja ukupno podržanih projekata")+
+          
+            ylab("Broj projekata")+
+          
+            xlab("")+
+          
+            theme(legend.position = "bottom",
+                  
+                  legend.title = element_blank(),
+                  
+                  panel.background = element_rect (fill = "#EDF6F5"),
+                  
+                  plot.title = element_text(hjust = 0.5),
+                  
+                  plot.margin = margin(1, 1, 1, 1, "cm"),
+                  
+                  plot.caption = element_text()
+            )
+        
+        ggplotly(brojprojekatagrafgod, tooltip = "label") %>%
+          
+            config(displayModeBar=FALSE) %>%
+          
+          layout( annotations = list(x = 1, y = -0.2, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
+                                                           
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
+                                                           xanchor='right', yanchor='auto', xshift = 0, yshift = 0, font = list(size = 11)))
+```
+
+
+
+Do 2020. godine beležimo postepeni rast, ako izuzmemo 2016. godinu, broja odobrenih medijskih projekata od Ministarstva (2015 –`r brojprojekataorgangod1min[1,3]`, 2016 – `r brojprojekataorgangod1min[2,3]`, 2017 – `r brojprojekataorgangod1min[3,3]`, 2018 – `r brojprojekataorgangod1min[4,3]`, 2019 – `r brojprojekataorgangod1min[5,3]`, 2020 – `r brojprojekataorgangod1min[6,3]`), a 2021. ova tendencija je prekinuta i finansirano je `r brojprojekataorgangod1min[7,3]` projekata. Realizovani projekti na nivou lokalnih samouprava su više nego udvostručeni u posmatranom periodu , uz blag pad 2021. godine (2015 – `r brojprojekataorgangod1lok[1,3]`, 2016 – `r brojprojekataorgangod1lok[2,3]`, 2017 – `r brojprojekataorgangod1lok[3,3]`, 2018 – `r brojprojekataorgangod1lok[4,3]`, 2019 – `r brojprojekataorgangod1lok[5,3]`, 2020 – `r brojprojekataorgangod1lok[6,3]`, 2021 –`r brojprojekataorgangod1lok[7,3]`). Broj projekata koje odobrava Pokrajinski sekretarijat za kulturu, javno informisanje i odnose sa verskim zajednicama je fluktuirajući, a svoj vrhunac je dosegao 2018. godine  (2015 – `r brojprojekataorgangod1pok[1,3]`, 2016 – `r brojprojekataorgangod1pok[2,3]`, 2017 – `r brojprojekataorgangod1pok[3,3]`, 2018 – `r brojprojekataorgangod1pok[4,3]`, 2019 – `r brojprojekataorgangod1pok[5,3]`, 2020 – `r brojprojekataorgangod1pok[6,3]`,  2021 – `r brojprojekataorgangod1pok[7,3]`). 
+
+```{r echo=FALSE, fig.cap = "Grafikon 1.3"}
+
+# Kreiranje line charta  za broj projekata po godinama prema organu koji je dodelio sredstva
+
+ gg <- ggplot (brojprojekataorgangod, aes(GODINA, `BROJ PROJEKATA`, group = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, label = Info, color = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)) +
+          
+            geom_line(position = position_dodge(0.1))+
+          
+            geom_point(position = position_dodge(0.1))+
+          
+            ggtitle("Trend rasta ukupno podržanih projekata prema organu")+
+          
+            scale_color_manual(values = c("#9F2A63FF", "#F57D15FF", "#FAC127FF")) +
+          
+            ylab("Broj projekata")+
+          
+            xlab("")+
+  
+            theme(legend.position = "bottom",
+                  
+                  legend.title = element_blank(),
+                  
+                  panel.background = element_rect (fill = "#EDF6F5"),
+                  
+                  plot.title = element_text(hjust = 0.5),
+                  
+                  plot.margin = margin(1, 1, 1, 1, "cm"),
+                  
+                  plot.caption = element_text()
+            )
+        
+        ggplotly(gg, tooltip = "label") %>%
+          
+            config(displayModeBar=FALSE) %>%
+          
+          layout(legend = list(title = list(text = 'Organ'), orientation = "h", x = 0, y = -0.3), annotations = 
+                   
+                                                      list(x = 1, y = -0.3, text = "*Klikom na teme u legendi ispod određujete koja će\n da se pojavi na grafikonu. Dupli klik resetuje grafikon.", 
+                                                           
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
+                                                           
+                                                           xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0, font = list(size = 11)))
+```
+
+Ako podatke o broju odobrenih projekata ukrstimo sa onima koji govore da se, paralelno i relativno (2021. godina je izuzetak koji međutim ne odmiče previše od trenda, pogotovo ako uzmemo u obzir činjenicu da su možda na samom kraju 2021. godine dodeljena sredstva koja mi u analizi nismo tretirali), povećavaju i ukupni iznosi opredeljeni za javni interes u sferi javnog informisanja, zaključak bi mogao biti: ukoliko bi se sistem konkursnog sufinansiranja sprovodio u skladu sa zakonskim odredbama i dobrim praksama, on bi značajno unapredio kvalitet medijske ponude, uključujući tu i medijski i sadržinski pluralizam.
+
+
+### Vrednosti projekata {align=justify}
+
+Ukupna sredstva koja je država na svim nivoima opredelila za konkursno sufinansiranje medija u periodu od početka 2015. do decembra 2021. godine iznosi – `r format(sum(Projectmedia[,10]), big.mark=',')` evra. I tu je primetna uzlazna linija iz godine u godinu, pa su tako mediji i medijske organizacije 2015. godine dobili oko `r paste(round(yearstable[1,2]/ 1e6, 1))` miliona, a 2016. nešto više od `r paste(round(yearstable[2,2]/ 1e6, 1))` miliona evra. U 2017. iznos je približan `r paste(round(yearstable[3,2]/ 1e6, 1))` miliona evra, a 2018. – `r paste(round(yearstable[4,2]/ 1e6, 1))` miliona evra. 2019. godine država interveniše putem konkursa u medijsku sferu sa čak `r paste(round(yearstable[5,2]/ 1e6, 1))` miliona evra, da bi 2020. bio dosegnut rekord od nešto više od  `r paste(round(yearstable[6,2]/ 1e6, 1))` milion evra. 2021. godine beležimo pad, na svim konkursima dodeljeno je – `r paste(round(yearstable[7,2]/ 1e6, 1))` miliona evra. Ponavljamo, ovaj podatak treba uzeti sa rezervom ukoliko su neka sredstva dodeljivana na samom kraju godine, a koja nisu tretirana ovim istraživanjem.
+
+```{r echo=FALSE,fig.cap="Grafikon 2.1"}
+
+# Kreiranje line  charta  za trend dodele sredstava po godinama
+
+godinasredstvagraf <- ggplot (novacgod, aes(as.factor(GODINA), `SREDSTVA U EVRIMA`, label = Info))+
+          geom_point(color = "#1DA460")+ 
+            geom_line(aes(group = 1),colour = "#1DA460")+
+          
+            ggtitle("Trend dodele sredstava po godinama za sve organe")+
+          
+            xlab("")+
+  
+            scale_y_continuous(name = "Sredstva u evrima", labels = comma)+
+  
+            theme(legend.position = "bottom",
+                  
+                  legend.title = element_blank(),
+                  
+                  panel.background = element_rect (fill = "#EDF6F5"),
+                  
+                  plot.title = element_text(hjust = 0.5),
+                  
+                  plot.margin = margin(1, 1, 1, 1, "cm"),
+                  
+                  plot.caption = element_text()
+            )
+        
+        ggplotly(godinasredstvagraf, tooltip = "label") %>%
+          
+            config(displayModeBar=FALSE) %>%
+          
+          layout( annotations = list(x = 1, y = -0.2, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
+                                                           
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
+                                                           xanchor = 'right', yanchor ='auto', xshift = 0, yshift = 0, font = list(size = 11)))
+```
+
+
+Lokalne samouprave su u svrhu konkursnog sufinansiranja izdvojile ukupno `r paste(round(barchartorgani[1,2]/ 1e6, 1))` miliona evra, Ministarstvo – `r paste(round(barchartorgani[2,2]/ 1e6, 1))`  miliona, dok je vojvođanski Sekretarijat na medijske konkurse tokom šest godina potrošio `r paste(round(barchartorgani[3,2]/ 1e6, 1))` miliona evra. Treba, međutim, naglasiti da ovaj poslednji organ vlasti izdvaja značajna sredstva (oko 300 miliona dinara godišnje) za medije na jezicima nacionalnih manjina kojima su osnivači manjinski nacionalni saveti, ali ne putem konkursa već putem direktnog davanja, što ukazuje na nedoslednost postojeće medijske legislative.
+
+```{r echo=FALSE,fig.cap="Grafikon 2.2"}
+# Kreiranje bar charta  za ukupno dodeljena sredstva prema organu vlasti
+
+graforganinovac <- ggplot (data = barchartorgani, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, -`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`, label = `Info`))+
+          
+            geom_bar (stat = "identity",fill = c("#9F2A63FF", "#F57D15FF", "#FAC127FF"))+
+            
+            xlab ("Organ koji je raspisao konkurs")+
+          
+             scale_y_continuous(name = "Sredstva u evrima", labels = comma)+
+          
+            ggtitle ("Ukupno dodeljena sredstva\n od 2015-2021. godine od svih organa")+
+          
+            theme (legend.position = "none",
+                   
+                   panel.background = element_rect (fill = "transparent"),
+                   
+                   plot.background = element_rect (fill = "transparent", color = NA),
+                   
+                   plot.title = element_text ( hjust = 0.5),
+                   
+                   axis.text.x = element_blank(),
+                   
+                   axis.ticks = element_blank(),
+                   
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
+        
+        ggplotly(graforganinovac, tooltip = "Info") %>%
+          
+            config(displayModeBar = FALSE) %>%
+          
+            layout(annotations = 
+                       list(x = 1, y = -0.2, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
+                            
+                            showarrow = F, xref = 'paper', yref = 'paper', 
+                            
+                            xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0,
+                            
+                            font = list(size = 11)))
+
+
+```
+
+Kada posmatramo vrednost odobrenih projekata po organima vlasti, primetićemo da je opredeljeni iznos Ministarstva, izražen u evrima, manje-više konstantan (2015 –`r novacgodorgan1min[1,3]`, 2016 – `r novacgodorgan1min[2,3]`, 2017 – `r novacgodorgan1min[3,3]`, 2018 – `r novacgodorgan1min[4,3]`, 2019 – `r novacgodorgan1min[5,3]`, 2020 – `r novacgodorgan1min[6,3]`, 2021 – `r novacgodorgan1min[7,3]` evra), kao i da su davanja Sekretarijata, ako izuzmemo 2016. godinu, manje-više identična  (2015 – `r novacgodorgan1pok[1,3]`, 2016 – `r novacgodorgan1pok[2,3]`, 2017 – `r novacgodorgan1pok[3,3]`, 2018 – `r novacgodorgan1pok[4,3]`, 2019 – `r novacgodorgan1pok[5,3]`, 2020 – `r novacgodorgan1pok[6,3]` i 2021 – `r novacgodorgan1pok[7,3]` evra), a da se vrednost medijskih projekata koji podržavaju lokalne samouprave značajno uvećao u periodu od 2015. godine do danas, uz zabeležen pad 2021. u odnosu na 2020. godinu (2015 – `r novacgodorgan1lok[1,3]`, 2016 – `r novacgodorgan1lok[2,3]`, 2017 – `r novacgodorgan1lok[3,3]`, 2018 – `r novacgodorgan1lok[4,3]`, 2019 – `r novacgodorgan1lok[5,3]`, 2020 – `r novacgodorgan1lok[6,3]` i 2020 – `r novacgodorgan1lok[7,3]` evra ). 
+
+```{r echo=FALSE,fig.cap="Grafikon 2.3"}
+# Kreiranje line charta  za trend davanja novca po godinama prema organu koji je dodelio sredstva
+
+ gg <- ggplot (novacgodorgan, aes(GODINA, `SREDSTVA U EVRIMA`, group = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, label = Info, color = `ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`)) +
+          
+            geom_line(position = position_dodge(0.1))+
+          
+            geom_point(position = position_dodge(0.1))+
+          
+            ggtitle("Trend davanja novca prema organu")+
+          
+            scale_color_manual(values = c("#9F2A63FF", "#F57D15FF", "#FAC127FF")) +
+          
+            scale_y_continuous(name = "Sredstva u evrima", labels = comma)+
+          
+            xlab("")+
+          
+            theme(legend.position = "bottom",
+                  
+                  legend.title = element_blank(),
+                  
+                  panel.background = element_rect (fill = "#EDF6F5"),
+                  
+                  plot.title = element_text(hjust = 0.5),
+                  
+                  plot.margin = margin(1, 1, 1, 1, "cm"),
+                  
+                  plot.caption = element_text()
+            )
+        
+        ggplotly(gg, tooltip = "label") %>%
+          
+            config(displayModeBar = FALSE) %>%
+          
+          layout(legend = list(title = list(text = 'Organ'), orientation = "h", x = 0, y =-0.3), annotations = 
+                   
+                                                      list(x = 1, y = -0.3, text = "*Klikom na teme u legendi ispod određujete koja će\n da se pojavi na grafikonu. Dupli klik resetuje grafikon.", 
+                                                           
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
+                                                           
+                                                           xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0, font = list(size = 11)))
+```
+
+
+
+Pet gradova koji su izdvojili najveća sredstva za konkursno sufinansiranje u posmatranom periodu su `r Opstinesuma1[1,1]` (`r Opstinesuma1[1,2]` evra), `r Opstinesuma1[2,1]` (`r Opstinesuma1[2,2]`), `r Opstinesuma1[3,1]` (`r Opstinesuma1[3,2]`), `r Opstinesuma1[4,1]` (`r Opstinesuma1[4,2]`) i `r Opstinesuma1[5,1]` (`r Opstinesuma1[5,2]`). Manje-više, ovi podaci prate veličinu tih lokalnih samouprava, uz izuzetak Kragujevca, koji, kao što smo rekli, do 2021. godine nije izdvojio niti dinara za konkursno sufinansiranje javnog interesa u sferi javnog informisanja.
+
+Interesantno je posmatrati koliko su sredstava za informisanje u proteklom periodu izdvojile pojedine lokalne samouprave u odnosu na broj stanovnika koji žive na njihovoj teritoriji. U ovu analizu nismo uključili lokalne samouprave koje uopšte nisu raspisivale konkurs za medijske sadržaje, niti gradske opštine (beogradske i niške) zbog njihove specifičnosti. Najviše sredstava za javni interes u sferi javnog informisanja, po glavi stanovnika, izdvojila je opština `r popopstinetop[1,1]` (`r popopstinetop[1,4]` evra per capita), sledi `r popopstinetop[2,1]` (`r popopstinetop[2,4]`), `r popopstinetop[3,1]` (`r popopstinetop[3,4]`), `r popopstinetop[4,1]` (`r popopstinetop[4,4]`) i `r popopstinetop[5,1]` (`r popopstinetop[5,4]`). Najmanje sredstava u periodu od sedam godina potrošila je opština `r popopstinelow[1,1]` (`r popopstinelow[1,4]` per capita), `r popopstinelow[2,1]` (`r popopstinelow[2,4]`), `r popopstinelow[3,1]` (`r popopstinelow[3,4]`), `r popopstinelow[4,1]` (`r popopstinelow[4,4]`) i `r popopstinelow[5,1]` (`r popopstinelow[5,4]`).
+
+```{r echo=FALSE, fig.cap="Grafikon 2.4"}
+# Kreiranje bar charta  za  5 opstina koje su dale najvise i 5 opstina koje su dale najmanje sredstava per capita
+
+grafpopopstinetop <- ggplot (data = popopstinetop, aes (x = reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, -`Po broju stanovnika`), y = `Po broju stanovnika`,label = `Info`))+
+          
+            geom_bar (stat = "identity",fill="#cc6a70ff")+
+            
+            xlab ("")+
+          
+             ylab("Sredstva u evrima per capita")+
+          
+            ggtitle ("")+
+          
+            theme (legend.position = "none",
+                   
+                   panel.background = element_rect (fill = "transparent"),
+                   
+                   plot.background = element_rect (fill = "transparent", color = NA),
+                   
+                   plot.title = element_text ( hjust = 0.5),
+                   
+                   axis.text.x = element_text(angle = 30),
+                   
+                   axis.ticks = element_blank(),
+                   
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
+        
+     plot1<-   ggplotly(grafpopopstinetop, tooltip = "Info") %>%
+          
+            config(displayModeBar = FALSE) 
+
+      
+        grafpopopstinelow <- ggplot (data = popopstinelow, aes (reorder(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`, `Po broju stanovnika`), y = `Po broju stanovnika`,label = `Info`))+
+          
+            geom_bar (stat = "identity",fill = "#cc6a70ff")+
+            
+            xlab ("")+
+          
+             ylab("Sredstva u evrima per capita")+
+          
+            ggtitle ("Pet lokalnih samouprava koje su dodelile najviše i pet koje su dale najmanje\n sredstava per capita za medijske projekte od 2015-2021")+
+          
+            theme (legend.position = "none",
+                   
+                   panel.background = element_rect (fill = "transparent"),
+                   
+                   plot.background = element_rect (fill = "transparent", color = NA),
+                   
+                   plot.title = element_text ( hjust = 0.5),
+                   
+                   axis.text.x = element_text(angle = 30),
+                   
+                   axis.ticks = element_blank(),
+                   
+                   plot.margin = unit(c(1,1,1.5,1.2), "cm"))
+        
+      plot2 <- ggplotly(grafpopopstinelow, tooltip = "Info") %>%
+          
+            config(displayModeBar = FALSE) %>%
+          
+            layout(annotations = 
+                       list(x = 1, y = -0.2, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
+                            
+                            showarrow = F, xref = 'paper', yref = 'paper', 
+                            
+                            xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0,
+                            
+                            font = list(size = 11)))
+
+subplot(plot1, plot2,shareY =  TRUE)
+```
+
+
+Što se tiče podnosilaca projekata, najviše novca – zbirno gledajući sve organe vlasti – dobila je  `r barchartpodnosiocizasve1[1,1]` (`r barchartpodnosiocizasve1[1,2]` evra za `r barchartpodnosiocizasve1[1,3]` projekata), slede `r barchartpodnosiocizasve1[2,1]`  (`r barchartpodnosiocizasve1[2,2]` za `r barchartpodnosiocizasve1[2,3]` projekata), `r barchartpodnosiocizasve1[3,1]`  (`r barchartpodnosiocizasve1[3,2]` za `r barchartpodnosiocizasve1[3,3]`), `r barchartpodnosiocizasve1[4,1]` (`r barchartpodnosiocizasve1[4,2]` za `r barchartpodnosiocizasve1[4,3]` projekata) i `r barchartpodnosiocizasve1[5,1]`  (`r barchartpodnosiocizasve1[5,2]` za `r barchartpodnosiocizasve1[5,3]`). Među pet prvoplasiranih, nalaze se čak četiri medijske kuće koje su bili predmet privatizacije tokom 2015 i 2016. godine. Jasno je iz ovoga da su pojedini mediji orijentisani na manji broj organa vlasti sa većim projektima dok su drugima sredstva koja dobijaju po konkursu disperzirana.
+
+
+Na konkursima koje je raspisalo Ministarstvo kulture i informisanja najviše sredstava je dobila `r podnosiocikult[1,1]` (`r podnosiocikult[1,2]` evra), potom slede `r podnosiocikult[2,1]` (`r podnosiocikult[2,2]`), `r podnosiocikult[3,1]` (`r podnosiocikult[3,2]`) i `r podnosiocikult[4,1]` (`r podnosiocikult[4,2]`). Sekretarijat je tokom ovih sedam godina najviše vrednovao medijske projekte koje su podneli `r podnosiocipoksek[1,1]` (`r podnosiocipoksek[1,2]` evra), izdavač „Dnevnika“ `r podnosiocipoksek[2,1]` (`r podnosiocipoksek[2,2]`), `r podnosiocipoksek[3,1]` (`r podnosiocipoksek[3,2]`) i `r podnosiocipoksek[4,1]` (`r podnosiocipoksek[4,2]`). 
+
+Na lokalnom nivou je primećeno da neki mediji dobijaju sredstva i na teritorijama onih lokalnih samouprava na kojima nisu programski prisutni, bar ne na značajnom nivou. Kada posmatramo sve lokalne samouprave, najviše sredstava na njihovim konkursima je povukla `r podnosiociloksam[1,1]` (`r podnosiociloksam[1,2]` evra), slede `r podnosiociloksam[2,1]` (`r podnosiociloksam[2,2]`), `r podnosiociloksam[3,1]` (`r podnosiociloksam[3,2]`) i `r podnosiociloksam[4,1]` (`r podnosiociloksam[4,2]`). Iz svega ovoga se može zaključiti da postoje mediji koji su favorizovani na lokalnom nivou, dok na pokrajinskom i republičkom povlače znatno manja sredstva.
+
+```{r echo=FALSE, fig.cap="Grafikon 2.5"}
+# Kreiranje bar charta  za top 5 podnosilaca koji su dobili navise sredstava od svih organa koji raspisuju konkurse
+
+bci <-  ggplot (data = barchartpodnosiocizasve, aes (x = reorder(`PODNOSILAC PROJEKTA`, -`SREDSTVA U EVRIMA`), y = `SREDSTVA U EVRIMA`,label = `Info`))+
+        
+        geom_bar (stat = "identity",fill = "#E95420")+
+        
+        xlab ("Podnosilac projekta")+
+        
+        scale_y_continuous(name = "Sredstva od 2015-2021. u evrima", labels = comma)+
+        
+        ggtitle ("Pet podnosilaca\n koji su dobili najviše sredstava\n od svih organa")+
+        
+        theme (legend.position = "none",
+               
+               panel.background = element_rect (fill = "transparent"),
+               
+               plot.background = element_rect (fill = "transparent", color = NA),
+               
+               plot.title = element_text ( hjust = 0.5),
+               
+               
+               axis.text.x = element_blank(),
+               
+               axis.ticks = element_blank(),
+               
+               plot.margin = unit(c(1.5,1,1.5,1.2), "cm"))
+      
+      ggplotly( bci, tooltip = "Info") %>%
+        
+        config(displayModeBar=FALSE) %>%
+        
+        layout(annotations = 
+                 list(x = 1, y = -0.2, text = "*Prelaskom kursora preko grafikona videćete informacije.", 
+                      
+                      showarrow = F, xref = 'paper', yref = 'paper', 
+                      
+                      xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0, font = list(size = 10)))
+```
+
+### Tematski okviri {align=justify}
+
+Podržane projekte smo klasifikovali prema tematskim okvirima, a tematske okvire smo uskladili sa definicijom javnog interesa u Zakonu o javnom informisanju i medijima, ali i prema učestalostima nekih tema, koju smo konstatovali tokom istraživanja. Tematski okvir smo određivali iz naziva odobrenog projekta. Ubedljivo najzastupljeniji projekti predstavljaju `r zatekstteme[1,1]`, a ostale teme su: ekologija i zdravlje, ekonomija, kultura i obrazovanje, manjinski sadržaji, neprivilegovane grupe, sport i ostalo. Važno je napomenuti da smo, sledeći metodologiju, sve sadržaje na manjinskom jeziku svrstali u istu grupu (manjinski sadržaji) bez obzira na temu koju obrađuju. Među manjinske sadržaje smo svrstali i one kojima su tema manjinske nacionalne zajednice i njihova kultura na primer. Bilo bi interesantno sprovesti zasebno istraživanje o tome koju vrstu medijskih sadržaja država podstiče na manjinskim jezicima.
+
+Vest da dominiraju klasični informativni sadržaji je logična, ali dubinskom analizom možemo otkriti da među njima ima mnogo toga što bi trebalo da predstavlja uobičajenu aktivnost medija i što ne predstavlja, bar ne po pravilu, javni interes. Takođe, konstatujemo da ima mnogo sadržaja koji predstavljaju tzv. praćenje rada organa vlasti, što je zapravo u suprotnosti sa onim što bi konkursno sufinansiranje trebalo da podstiče, a to je – između ostalog – kritički otklon od vlasti. I u ovom slučaju bi bilo interesantno napraviti dodatnu analizu kojom bi se utvrdilo koji procenat projekata zapravo predstavlja svojevrsnu marketinšku aktivnost organa vlasti. U svakom slučaju, ovakvi projekti su uglavnom prisutni na nivou lokalnih samouprava.
+
+Kao što se vidi na grafikonu, ubedljivo najviše novaca država izdvaja za informativni program, maltene dvostruko više u odnosu na ostale medijske sadržaje. 2015. godine organi vlasti su izdvojili `r info2015sredstva` evra, potom je usledio pad, a onda konstantni porast do 2020. kada je iznosio – `r info2020sredstva` evra. 2021. godine, a u skladu sa padom ukupnih sredstava za medijske konkurse, u ovu svrhu je potrošeno  `r info2021sredstva` evra.  Primera radi, za sve ostale sadržaje 2021. godine izdvojeno je `r sumabezinfo2021`  evra. Proteklih godina uvećano je izdvajanje i za kulturu i obrazovanje (drugi tematski okvir po ukupnom izdvajanju), pa je sa `r kult2015sredstva` evra 2015. godine ono doseglo `r kult2020sredstva` evra 2020. godine, uz zabeležen pad 2021. godine – `r kult2021sredstva`. 
+
+```{r echo=FALSE, fig.cap="Grafikon 3.1"}
+# Kreiranje line charta  za  koliko je sredstava dodeljeno po temama po godinama 
+
+ linechart <- ggplot (linechartteme, aes(GODINA, `SREDSTVA U EVRIMA`, group = `TEMA PROJEKTA`, label = Info, color = `TEMA PROJEKTA`)) +
+          
+            geom_line(position = position_dodge(0.1))+
+          
+            geom_point(position = position_dodge(0.1))+
+          
+            ggtitle("Ukupno izdvojena sredstva po temama projekata\n za period 2015-2021 (u evrima)")+
+          
+            scale_color_viridis(discrete = TRUE) +
+          
+             scale_y_continuous(name = "Sredstva od 2015-2021. u evrima", labels = comma)+
+          
+            xlab("")+
+          
+            theme(legend.position = "bottom",
+                  
+                  legend.title = element_blank(),
+                  
+                  panel.background = element_rect (fill = "#EDF6F5"),
+                  
+                  plot.title = element_text(hjust = 0.5),
+                  
+                  plot.margin = margin(1, 1, 1, 1, "cm"),
+                  
+                  plot.caption = element_text()
+            )
+        
+        ggplotly(linechart, tooltip = "label") %>%
+          
+            config(displayModeBar = FALSE) %>%
+          
+          layout(legend = list(title = list(text = 'Teme projekata'), orientation = "h", x = 0, y =-0.3), annotations = 
+                   
+                                                      list(x = 1, y = -0.3, text = "*Klikom na teme u legendi ispod određujete koja će\n da se pojavi na grafikonu. Dupli klik resetuje grafikon.", 
+                                                           
+                                                           showarrow = F, xref = 'paper', yref = 'paper', 
+                                                           
+                                                           xanchor = 'right', yanchor = 'auto', xshift = 0, yshift = 0, font = list(size = 10)))
+  
+```
+
+
+Kada posmatramo zbirne iznose za sve godine i sve podnosioce, za `r zatekstteme[1,1]` izdvojeno je ukupno `r zatekstteme[1,3]` evra ili `r zatekstteme[1,4]`% ukupno opredeljenih sredstava za konkursno sufinansiranje u periodu od 2015. do 2021. godine. Sledeća tema, `r zatekstteme[2,1]` je dobila `r zatekstteme[2,3]` evra ili `r zatekstteme[2,4]`% ukupnog sedmogodišnjeg budžeta za medijske projekte. Slede projekti koji se opiru klasifikaciji (`r zatekstteme[3,1]`, `r zatekstteme[3,3]` evra ili `r zatekstteme[3,4]`%), potom projekti koji se se odnose na `r zatekstteme[4,1]` (`r zatekstteme[4,3]` ili `r zatekstteme[4,4]`%), slede `r zatekstteme[5,1]` (`r zatekstteme[5,3]` ili `r zatekstteme[5,4]`%), `r zatekstteme[6,1]` (`r zatekstteme[6,3]` ili `r zatekstteme[6,4]`%), `r zatekstteme[7,1]` (`r zatekstteme[7,3]` ili `r zatekstteme[7,4]`%) i, na kraju, `r zatekstteme[8,1]` (`r zatekstteme[8,3]` ili `r zatekstteme[8,4]`%). Sredstva u visini od `r bezinfonovci` evra ili `r bezinfoprocenti`% ukupnog novca otišla su na projekte za koje nismo uspeli detektovati temu, iz prostog razloga što na pojedinim Rešenjima o dodeli sredstava, na nivou lokalnih samouprava, nisu navedeni nazivi projekata. Na prethodnom grafikonu vidimo da je broj takvih rešenja u značajnom padu što je dobra vest.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Grafikon 3.2" }
+
+# Kreiranje pie charta  udeo zastupljenosti tema za sve konkurse koji su obradjeni na svim nivoima vlasti
+
+pcpall <-  Zastupljenosttema %>%
+      plot_ly(labels = ~Info, values = ~`SREDSTVA U EVRIMA`, hoverinfo = "label",marker = list(colors = Zastupljenosttema$boje), textinfo = "none") %>%
+      
+      add_pie() %>%
+  
+      config(displayModeBar = FALSE) %>%
+      
+      layout(showlegend = F,
+             
+             title = list(text =  "Prikaz učešća dodeljenih sredstava po temama za\n sve godine"),
+             margin = list(t = 100),
+             
+             paper_bgcolor = 'rgba(0,0,0,0)',
+             
+             plot_bgcolor = 'rgba(0,0,0,0)',
+             
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  
+pcpall  
+
+```
+
+
+## Preporuke za povećanje transparentnosti konkursnog sufinansiranja medijskih sadržaja {align=justify}
+
+1. U najkraćem roku izmeniti Zakon o javnom informisanju i medijima u skladu sa Strategijom razvoja sistema javnog informisanja u Republici Srbiji za period od 2020. do 2025. godine, odredbama koji unapređuju transparentnost procesa konkursnog sufinansiranja medijskih sadržaja u skladu sa Zakonom definisanim javnim interesom. U izmene Zakona uvrstiti i preporuke iz našeg projekta. Pojedine preporuke je moguće implementirati i promenom podzakonskog akta, odnosno Pravilnika o sufinansiranju javnog interesa u sferi javnog informisanja, a za ovaj dokument je nadležno Ministarstvo kulture i informisanja Republike Srbije.
+
+2. Izmenama zakona obavezati vlasti koje raspisuju konkurse za finansiranje javnog interesa u sferi javnog informisanja da podatke dostavljaju Portalu otvorenih podataka, u mašinski čitljivom formatu.
+
+3.	Ministarstvo kulture i informisanja izmenama Pravilnika o sufinansiranju javnog interesa u sferi javnog informisanja da precizno odredi koje podatke treba da sadrži Rešenje o dodeli sredstava. Ti podaci treba da odgovaraju podacima koji se dostavljaju Portalu otvorenih podataka. Preporučujemo da se u rešenjima nalaze sledeće informacije: podnosilac projekta, matični broj podnosioca projekta, naziv medija (u slučaju da je u pitanju produkcija naziv medija ili nazivi medija na kojima će se određeni sadržaj objaviti ili emitovati), registarski broj medija, naziv projekta, tematski okvir, traženi iznos, dobijeni iznos.
+
+4.	Ministarstvo kulture i informisanja izmenama Pravilnika o sufinansiranju javnog interesa u sferi javnog informisanja da obezbedi da se u rešenjima o dodeli sredstava pronađu i kratki opisi (iz formulara) odobrenih i odbačenih predloga projekata kako bi se olakšalo definisanje i verifikovao tematski okvir.
+
+5.	Izmenama zakona obezbediti da svi dokumenti vezani za konkursne procedure, uključujući i narativne i finansijske izveštaje o realizovanim projektima, budu javno dostupni.
+
+6.	Ministarstvo kulture i informisanja izmenama Pravilnika o sufinansiranju javnog interesa u sferi javnog informisanja da unifikuje tematske okvire odobrenih projekata u skladu sa javnim interesom u medijskoj sferi definisanim Zakonom o javnom informisanju i medijima. Taj kompleks tema ne treba da bude ograničavajući faktor, i treba predvideti i tematski okvir – „ostalo“.
+
+7.	Potrebno je organizovati obuke za predstavnike organa vlasti koji raspisuju konkurse za izradu slične aplikacije ukoliko žele da u svojoj lokalnoj zajednici vizuelno predstave podatke o konkursnom sufinansiranju.
+
+8.	Preporučuje se da se na svim nivoima vlasti u cilju „afirmativne akcije“ raspisuju zasebni konkursi namenjeni pripadnicima nacionalnih manjina, skladno zastupljenosti manjinskog stanovništva na teritoriji određene lokalne samouprave.
+
+9.	Iako to nije bila tema našeg projekta, ali zarad veće transparetnosti celokupnog procesa, Ministarstvo kulture i informisanja izmenama Pravilnika o sufinansiranju javnog interesa u sferi javnog informisanja treba da odredi da se u Odluci o imenovanju članova konkursne komisije nalazi i informacija na čiji predlog su imenovani, kao i kratka biografija članova komisije.
+
+10.	U svrhu potpune transparentnosti konkursnog sufinansiranja medijskog sadržaja, potrebno je podržati inicijative koje podrazumevaju da svi medijski sadržaji proizvedeni kroz realizaciju projekta budu dostupni građanima, po mogućnosti na jednom portalu.
+
+
+
+## Fusnote
+
+
+
+
