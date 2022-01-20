@@ -907,8 +907,8 @@ ui <-
                           
                           plotlyOutput("linechartteme", height = 500) %>% withSpinner(color = "#E95420"),
                           h5 (strong("*")," Kreiranje veb aplikacije podržali su Misija OEBS-a u Srbiji i Ministarstvo kulture i informisanja. Stavovi izrečeni pripadaju isključivo autoru i njegovim saradnicima i
-                              ne predstavljaju nužno stav Misije OEBS-a u Srbiji i Ministartva kulture i informisanja. Sve reference na Kosovo, bilo da se radi o teritoriji, institucijama ili stanovništvu, u ovoj aplikaciji i podacima treba shvatiti 
-                              u potpunoj saglasnosti sa Rezolucijom 1244 Saveta bezbednosti Ujedinjenih nacija.", align ="justify"),
+                              ne predstavljaju nužno stav Misije OEBS-a u Srbiji i Ministartva kulture i informisanja. Svako spominjanje naziva Kosovo, bez obzira da li upućuje na teritoriju, institucije ili stanovništvo u ovoj aplikaciji i podacima treba da se tumači
+                              u potpunosti u skladu sa Rezolucijom saveta bezbednosti UN 1244.", align ="justify"),
                           
                           fluidRow(
                             column(4, img(src="COZ logo.jpg",style="width: 200px;")),
