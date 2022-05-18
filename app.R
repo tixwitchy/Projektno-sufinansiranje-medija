@@ -1074,17 +1074,17 @@ ui <-
                
                downloadBttn ("downloaddatabase1", "Preuzmi.XLSX", style = "gradient", size = "sm"),
                
-               h4("Ovde možete da skinete metodologiju sa detaljima kako su prikupljeni podaci i publikaciju na srpskom i engleskom jeziku iz decembra 2020. godine." , align = "justify"),
+               h4("Ovde možete da skinete metodologiju sa detaljima kako su prikupljeni podaci i publikaciju na srpskom i engleskom jeziku iz decembra 2021. godine." , align = "justify"),
                
                # ubacivanje tastera za skidanje metodologije i analize
                
                downloadBttn ("downloaddatadict", "Metodologija", style = "gradient", size = "sm", color = "royal"),
                
-               downloadBttn ("downloadanalysis", "Publikacija 2020", style = "gradient", size = "sm", color = "royal"),
+               downloadBttn ("downloadanalysis", "Publikacija 2021", style = "gradient", size = "sm", color = "royal"),
                
-               downloadBttn ("downloadanalysiseng", "Publication 2020", style = "gradient", size = "sm", color = "royal"),
+               downloadBttn ("downloadanalysiseng", "Publication 2021", style = "gradient", size = "sm", color = "royal"),
                
-               h4(strong("Online verzija nacrta analize"), " dostupna je", a(" ovde.", href = "https://projektnosufinansiranjehtmlpublikacija.netlify.app/"), 
+               h4(strong("Online verzija analize"), " dostupna je", a(" ovde.", href = "https://projektnosufinansiranjehtmlpublikacija.netlify.app/"), 
                         " Sva rešenja koja su dobijena od lokalnih samouprava
                         
                         možete da pogledate na sledećem ", a("linku.", href = "https://docs.google.com/spreadsheets/d/1ajgnqWStLHUQ8XUA1LU0n5_1KdqcAIef1A4e4391ORI/edit#gid=0"), align = "justify"), 
