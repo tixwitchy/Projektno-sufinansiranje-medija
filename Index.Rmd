@@ -1,5 +1,5 @@
 ---
-title: "Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja- Nacrt"
+title: "Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja"
 author: "Nedim Sejdinović i Duško Medić"
 date: '`r format(Sys.Date(),"%d. %m. %Y.")`'
 output: 
