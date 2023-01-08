@@ -142,7 +142,7 @@ podnosiocipojsuma <- Projectmedia %>%
   
   group_by(`PODNOSILAC PROJEKTA`) %>%
   
-  summarise(`UKUPNO DODELJENO U EVRIMA`= sum(`SREDSTVA U EVRIMA`)) 
+  summarise(`Ukupno dodeljeno u evrima`= sum(`SREDSTVA U EVRIMA`)) 
 
 
 podnosiocimediji <- Projectmedia
@@ -153,29 +153,29 @@ podnosiocimediji<- podnosiocimediji %>%
   
   group_by(`PODNOSILAC PROJEKTA`) %>% 
   
-  summarize( `BROJ IDENTIFIKOVANIH MEDIJA ZA KOJE JE PODNOSILAC APLICIRAO` = n_distinct(`NAZIV MEDIJA`,na.rm = TRUE))
+  summarize( `Broj identifikovanih medija za koje je podnosilac aplicirao` = n_distinct(`NAZIV MEDIJA`,na.rm = TRUE))
 
 podnosiocipojsuma <- Projectmedia %>%
   
   
   group_by(`PODNOSILAC PROJEKTA`) %>%
   
-  summarise(`UKUPNO DODELJENO U EVRIMA`= sum(`SREDSTVA U EVRIMA`)) 
+  summarise(`Ukupno dodeljeno u evrima`= sum(`SREDSTVA U EVRIMA`)) 
 
 podnosiociorgani<- Projectmedia %>%
   
   group_by(`PODNOSILAC PROJEKTA`) %>% 
   
-  summarize( `BROJ ORGANA OD KOJIH JE PODNOSILAC DOBIO SREDSTVA` = n_distinct(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`))  
+  summarize( `Broj organa od kojih je podnosilac dobio sredstva` = n_distinct(`ORGAN KOJI RASPISUJE KONKURS/OPŠTINA`))  
 
 
 podnosiocitotal <- left_join(podnosiocipojsuma, podnosiocimediji, by = "PODNOSILAC PROJEKTA")
 podnosiocitotal <-left_join(podnosiocitotal, podnosiociorgani,by = "PODNOSILAC PROJEKTA")
 #Formatiranje kolone sa sredstvima
 
-podnosiocitotal$`UKUPNO DODELJENO U EVRIMA` <- format( 
+podnosiocitotal$`Ukupno dodeljeno u evrima` <- format( 
   
-  podnosiocitotal$`UKUPNO DODELJENO U EVRIMA`, big.mark = ',', digits = 0, nsmall=0, scientific = FALSE)
+  podnosiocitotal$`Ukupno dodeljeno u evrima`, big.mark = ',', digits = 0, nsmall=0, scientific = FALSE)
 
 
 
@@ -865,11 +865,11 @@ ui <-
                               
                               "u okviru kojeg je izrađena ova veb aplikacija („Otvorenim podacima do kvalitetnijeg projektnog sufinansiranja medijskih sadržaja“) 
                                   
-                                  podržali su ", a("Ministarstvo kulture i informisanja Republike Srbije", href = "http://www.kultura.gov.rs"),
+                                  podržali su Ministarstvo kulture i informisanja Republike Srbije 2020. i 2021. godine (čiji je resor sada preuzelo Ministarstvo informisanja i telekomunikacija) i",
                               
-                              "i", a("Misija OEBS-a u Srbiji", href = "https://www.osce.org/mission-to-serbia")," sa ciljem da se učini transparentnim ovaj proces 
+                              a("Misija OEBS-a u Srbiji", href = "https://www.osce.org/mission-to-serbia")," sa ciljem da se učini transparentnim ovaj proces 
                                   
-                                  koji je važan za medije, medijske profesionalce, ali i građane.", align = "justify"),
+                                  koji je važan za medije, medijske profesionalce, ali i građane. Prikupljanje podataka za 2022. godinu podržao je i",a("USAID.", href = "https://www.usaid.gov/serbia"), align = "justify"),
                           
                           h4 ("Veb aplikacija koja je pred vama daje mogućnost da pretražujete podatke po podnosiocu projekta,
                                   
@@ -889,7 +889,7 @@ ui <-
                                         
                                         medijima. Jedna od novina je zastupljenost tema koje su definisane na osnovu naslova projekata. 
                                         
-                                        Tokom ovog procesa, od 2015. do  2021. godine, dodeljeno je ukupno ", format(sum(Projectmedia$`SREDSTVA U EVRIMA`), big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE),
+                                        Tokom ovog procesa, od 2015. do  2022. godine, dodeljeno je ukupno ", format(sum(Projectmedia$`SREDSTVA U EVRIMA`), big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE),
                                     
                                     "evra za ", format(NROW(tabelapodnosioci$`NAZIV PROJEKTA`), big.mark = ',', digits = 0, nsmall = 0, scientific = FALSE), "projekata koji su podneti od ukupno",
                                     
@@ -911,11 +911,13 @@ ui <-
                               u potpunosti u skladu sa Rezolucijom saveta bezbednosti UN 1244.", align ="justify"),
                           
                           fluidRow(
-                            column(4, img(src="COZ logo.jpg",style="width: 200px;")),
+                            column(3, img(src="USAID.png", style="width: 200px;margin-top: 60px;")),
                             
-                            column(4, img(src="OEBSlog.png", style="width: 260px; margin-top: 80px;")),
+                            column(3, img(src="COZ logo.jpg",style="width: 150px;")),
                             
-                            column(4, img(src="min.png"))
+                            column(3, img(src="OEBSlog.png", style="width: 200px; margin-top: 80px;")),
+                            
+                            column(3, img(src="min.png", style="width: 200px;"))
                           )
                           
                           
@@ -929,7 +931,7 @@ ui <-
              
              sidebarPanel(
                
-               h4("Ovde možete da pretražite podatke vezane za",strong("podnosioce projekata"), "koji su dobili sredstva u periodu od početka 2015. do 2021. godine.", align = "justify"), 
+               h4("Ovde možete da pretražite podatke vezane za",strong("podnosioce projekata"), "koji su dobili sredstva u periodu od početka 2015. do 2022. godine.", align = "justify"), 
                
                h4("Ako izaberete sve podnosioce iz padajućeg menija i pritisnete dugme ", strong("“Pretraži”"), "pojaviće vam se grafikon sa informacijama o četiri podnosioca medijskih projekata koji su
                         
@@ -969,7 +971,7 @@ ui <-
              
              sidebarPanel(
                
-               h4("Ovde možete da pretražite podatke o konkursima", strong ("Ministarstva kulture i informisanja Republike Srbije"), "za projektno sufinansiranje medijskih sadržaja od 2015 do 2021. godine.",align= "justify"),
+               h4("Ovde možete da pretražite podatke o konkursima", strong ("Ministarstva kulture i informisanja Republike Srbije"), "za projektno sufinansiranje medijskih sadržaja od 2015. do 2022. godine.",align= "justify"),
                
                h4("Podatke možete da pretražujete po temi projekata. Grafikoni prikazuju trend davanja novca u odnosu na određene teme. U donjem delu stranice imate i informaciju o četiri podnosioca koji su
                      
@@ -997,7 +999,7 @@ ui <-
                
                h4("Ovde možete da pretražite podatke o realizovanim projektima po konkursima ", strong("Pokrajinskog sekretarijata za kulturu, javno informisanje i odnose sa verskim zajednicama"),"za projektno sufinansiranje medijskih sadržaja 
                         
-                        u periodu od 2015. do 2021. godine.", align = "justify"),
+                        u periodu od 2015. do 2022. godine.", align = "justify"),
                
                h4 ("Grafikoni prikazuju trend davanja novca u odnosu na teme projekata. U donjem delu stranice se nalazi i informacija o četiri podnosioca projekata koji su dobili najviše novca od ovog organa vlasti.", align = "justify"),
                
@@ -1025,7 +1027,7 @@ ui <-
                
                h4("Ovde možete da pretražite podatke o medijskim projektima koje su po Zakonu o javnom informisanju i medijima 
                         
-                        podržale",strong("lokalne samouprave u Srbiji"), "od početka 2015. do 2021. godine.",align="justify"),
+                        podržale",strong("lokalne samouprave u Srbiji"), "od početka 2015. do 2022. godine.",align="justify"),
                
                h4( "Klikom na", strong("“Sve opštine”"), "dobijate tabelu sa informacijama koje su četiri opštine dodelile najviše sredstava,
                          
@@ -1084,7 +1086,7 @@ ui <-
                
                downloadBttn ("downloadanalysiseng", "Publication 2021", style = "gradient", size = "sm", color = "royal"),
                
-               h4(strong("Online verzija analize"), " dostupna je", a(" ovde.", href = "https://projektnosufinansiranjehtmlpublikacija.netlify.app/"), 
+               h4(strong("Online verzija analize iz 2022. godine"), " dostupna je", a(" ovde.", href = "https://projektnosufinansiranjehtmlpublikacija.netlify.app/"), 
                         " Sva rešenja koja su dobijena od lokalnih samouprava
                         
                         možete da pogledate na sledećem ", a("linku.", href = "https://docs.google.com/spreadsheets/d/1ajgnqWStLHUQ8XUA1LU0n5_1KdqcAIef1A4e4391ORI/edit#gid=0"), align = "justify"), 
@@ -1131,7 +1133,7 @@ server <- function(input, output, session){
       
       scale_y_continuous(name="", labels = comma)+
       
-      ggtitle ("Ukupno dodeljena sredstva\n od 2015-2021. godine")+
+      ggtitle ("Ukupno dodeljena sredstva\n od 2015-2022. godine")+
       
       theme (legend.position = "none",
              
@@ -1261,7 +1263,7 @@ server <- function(input, output, session){
   }})
   
   
-  output$tabelaukupnopodnosioci<-renderTable(totalpodnosiocireactive(),align = "c")
+  output$tabelaukupnopodnosioci<-renderTable(totalpodnosiocireactive(),align = "c", width = "50%")
   
   
   #grafikoni tab podnosioci bar chart i line chart uz uslov sta je izabrano iz padajuceg menija
