@@ -840,11 +840,17 @@ piecharttemeloksampoj <- piecharttemeloksampoj %>%
 
 #Kreiranje izgleda aplikacije User interface-UI
 
-ui <- 
+ui <-  
+  
   navbarPage(
     #glavni naslov i izbor teme
     
-    "Projektno sufinansiranje medija u Srbiji", theme = shinytheme ("united"),
+    title = div(img(src='COZ logo.jpg',
+                    style="margin-top: -14px;
+                               padding-right:10px;
+                               padding-bottom:10px",
+                    align ="left",
+                    height = 58),"Projektno sufinansiranje medija u Srbiji"), theme = shinytheme ("united"),
     
     # izgled prvog taba Opsti pregled sa tekstom i tabelama i grafikonom sa leve strane u sidebar panelu
     
