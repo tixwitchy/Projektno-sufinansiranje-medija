@@ -833,6 +833,28 @@ piecharttemeloksampoj <- piecharttemeloksampoj %>%
                             
                             `TEMA PROJEKTA` == "Sport" ~ "#FDE725FF"))
 
+# Kad se pretrazuju tabele da se prilikom klika na enter prikazuju rezultati
+
+jscode <- '$(document).keyup(function(e) {
+    if (e.key == "Enter") {
+    $("#go").click();
+}});'
+
+jscode1 <- '$(document).keyup(function(e) {
+    if (e.key == "Enter") {
+    $("#go1").click();
+}});'
+
+jscode2 <- '$(document).keyup(function(e) {
+    if (e.key == "Enter") {
+    $("#go2").click();
+}});'
+
+jscode3 <- '$(document).keyup(function(e) {
+    if (e.key == "Enter") {
+    $("#go3").click();
+}});'
+
 
 
 #########KRAJ OBRADE PODATAKA SLEDI UI I SERVER DEO####
@@ -933,7 +955,7 @@ ui <-
     
     #uredjivanje taba podnosilac projekta
     
-    tabPanel("Podnosilac projekta",
+    tabPanel("Podnosilac projekta", tags$head(tags$script(HTML(jscode))),
              
              sidebarPanel(
                
@@ -973,7 +995,7 @@ ui <-
     
     #uredjivanje taba Ministarstva kulture
     
-    tabPanel("Ministarstvo kulture i informisanja",
+    tabPanel("Ministarstvo kulture i informisanja", tags$head(tags$script(HTML(jscode1))),
              
              sidebarPanel(
                
@@ -999,7 +1021,7 @@ ui <-
     
     #Uredjivanje taba pokrajinski sekretarijat 
     
-    tabPanel("Pokrajinski sekretarijat",
+    tabPanel("Pokrajinski sekretarijat", tags$head(tags$script(HTML(jscode2))),
              
              sidebarPanel(
                
@@ -1027,7 +1049,7 @@ ui <-
     
     #Uredjivanje taba Lokalne samouprave
     
-    tabPanel("Lokalne samouprave",
+    tabPanel("Lokalne samouprave", tags$head(tags$script(HTML(jscode3))),
              
              sidebarPanel(
                
