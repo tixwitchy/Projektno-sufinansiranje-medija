@@ -833,28 +833,6 @@ piecharttemeloksampoj <- piecharttemeloksampoj %>%
                             
                             `TEMA PROJEKTA` == "Sport" ~ "#FDE725FF"))
 
-# Kad se pretrazuju tabele da se prilikom klika na enter prikazuju rezultati
-
-jscode <- '$(document).keyup(function(e) {
-    if (e.key == "Enter") {
-    $("#go").click();
-}});'
-
-jscode1 <- '$(document).keyup(function(e) {
-    if (e.key == "Enter") {
-    $("#go1").click();
-}});'
-
-jscode2 <- '$(document).keyup(function(e) {
-    if (e.key == "Enter") {
-    $("#go2").click();
-}});'
-
-jscode3 <- '$(document).keyup(function(e) {
-    if (e.key == "Enter") {
-    $("#go3").click();
-}});'
-
 
 
 #########KRAJ OBRADE PODATAKA SLEDI UI I SERVER DEO####
@@ -873,6 +851,15 @@ ui <-
                                padding-bottom:10px",
                     align ="left",
                     height = 58),"Projektno sufinansiranje medija u Srbiji"), theme = shinytheme ("united"),
+    
+    tags$head ( tags$style(HTML(
+      "th.sorting::before {
+      content: '' !important;
+        }
+
+      th.sorting::after {
+      content: '' !important;
+      }"))),
     
     # izgled prvog taba Opsti pregled sa tekstom i tabelama i grafikonom sa leve strane u sidebar panelu
     
@@ -955,7 +942,7 @@ ui <-
     
     #uredjivanje taba podnosilac projekta
     
-    tabPanel("Podnosilac projekta", tags$head(tags$script(HTML(jscode))),
+    tabPanel("Podnosilac projekta", 
              
              sidebarPanel(
                
@@ -991,11 +978,11 @@ ui <-
              
              #glavni panel sa velikom pretrazivom tabelom podnosilaca
              
-             mainPanel ( dataTableOutput("tabelapodnosioci"))),
+             mainPanel ( DT::dataTableOutput("tabelapodnosioci"))),
     
     #uredjivanje taba Ministarstva kulture
     
-    tabPanel("Ministarstvo kulture i informisanja", tags$head(tags$script(HTML(jscode1))),
+    tabPanel("Ministarstvo kulture i informisanja",
              
              sidebarPanel(
                
@@ -1017,11 +1004,11 @@ ui <-
                plotlyOutput("barchartministarstvopodnosioci")
              ), 
              
-             mainPanel ( dataTableOutput("tabelaministarstvo"))),
+             mainPanel ( DT::dataTableOutput("tabelaministarstvo"))),
     
     #Uredjivanje taba pokrajinski sekretarijat 
     
-    tabPanel("Pokrajinski sekretarijat", tags$head(tags$script(HTML(jscode2))),
+    tabPanel("Pokrajinski sekretarijat",
              
              sidebarPanel(
                
@@ -1045,11 +1032,11 @@ ui <-
                
              ), 
              
-             mainPanel ( dataTableOutput("tabelapoksek"))),
+             mainPanel ( DT::dataTableOutput("tabelapoksek"))),
     
     #Uredjivanje taba Lokalne samouprave
     
-    tabPanel("Lokalne samouprave", tags$head(tags$script(HTML(jscode3))),
+    tabPanel("Lokalne samouprave",
              
              sidebarPanel(
                
@@ -1088,7 +1075,7 @@ ui <-
                
              ), 
              
-             mainPanel ( dataTableOutput("tabelaopstina"))),
+             mainPanel ( DT::dataTableOutput("tabelaopstina"))),
     
     #Uredjivanje taba Podaci
     
@@ -1271,13 +1258,13 @@ server <- function(input, output, session){
   }   
   })
   
-  output$tabelapodnosioci <- renderDataTable({
+  output$tabelapodnosioci <- DT::renderDataTable({
     
-    tabelapodnosiocireact()
+   DT::datatable( tabelapodnosiocireact()
     
     
     
-  }, options = list(language = list(sSearch="Pretraži celu tabelu:", sLengthMenu="Prikaži _MENU_ unosa", info="Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa",paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))
+  ,rownames = FALSE,selection="none",filter = list(position = "bottom"),  options = list(language = list(sSearch="Pretraži celu tabelu:", sLengthMenu="Prikaži _MENU_ unosa", info="Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa",paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))})
   
   #Kreiranje male tabele uz uslov sta je izabrano iz padajuceg menija
   
@@ -1505,13 +1492,13 @@ server <- function(input, output, session){
   }   
   })
   
-  output$tabelaministarstvo <- renderDataTable({
+  output$tabelaministarstvo <- DT::renderDataTable({
     
-    tabelakulturareact()
+   DT::datatable( tabelakulturareact()
     
     
     
-  }, options = list(language = list(sSearch = "Pretraži celu tabelu:", sLengthMenu = "Prikaži _MENU_ unosa", info = "Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa",paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))
+  ,rownames = FALSE,selection = "none",filter = list(position = "bottom"),  options = list(language = list(sSearch = "Pretraži celu tabelu:", sLengthMenu = "Prikaži _MENU_ unosa", info = "Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa",paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))})
   
   
   # Kreiranje piechart teme za ministarstvo i  koliko je para  dato pojedinacno po temi po godinama uz uslov
@@ -1664,13 +1651,13 @@ server <- function(input, output, session){
   }   
   })
   
-  output$tabelapoksek <- renderDataTable({
+  output$tabelapoksek <- DT::renderDataTable({
     
-    tabelapoksekreact()
+   DT::datatable( tabelapoksekreact()
     
     
     
-  }, options = list(language = list(sSearch = "Pretraži celu tabelu:", sLengthMenu = "Prikaži _MENU_ unosa", info = "Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa", paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))
+  ,rownames = FALSE,selection = "none",filter = list(position = "bottom"),  options = list(language = list(sSearch = "Pretraži celu tabelu:", sLengthMenu = "Prikaži _MENU_ unosa", info = "Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa", paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))})
   
   
   # chart top cetiri teme poksek i  koliko je para  dato pojedinacno po temi uz uslov sta je izabrano iz  padajuceg menija
@@ -1859,13 +1846,13 @@ server <- function(input, output, session){
   }   
   })
   
-  output$tabelaopstina <- renderDataTable({
+  output$tabelaopstina <- DT::renderDataTable({
     
-    tabelaopstinereact()
+   DT::datatable( tabelaopstinereact()
     
     
     
-  }, options = list(language = list(sSearch = "Pretraži celu tabelu:", sLengthMenu = "Prikaži _MENU_ unosa", info = "Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa", paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))
+  ,rownames = FALSE,selection = "none",filter = list(position = "bottom"),  options = list(language = list(sSearch = "Pretraži celu tabelu:", sLengthMenu = "Prikaži _MENU_ unosa", info = "Prikazuje od _START_ do _END_ od ukupno _TOTAL_ unosa", paginate = list(previous = 'PRETHODNI', `next` = 'SLEDEĆI'))))})
   
   
   #pie  chart teme i line chart  godine lokalne samouprave uz uslov sta je izabrano iz padajuceg menija
